@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block title %}Health Readings - {{ patient.user.get_full_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+  .reading-Normal { background-color: #e8f5e9; }
+  .reading-Abnormal { background-color: #fce4ec; }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const chartData = {{ chart_data|safe }};
+    const ctx = document.getElementById('readingsChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: chartData.timestamps,
+        datasets: [
+          {
+            label: 'Systolic',
+            data: chartData.systolic,
+            borderColor: '#e74c3c',
+            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 3,
+          },
+          {
+            label: 'Diastolic',
+            data: chartData.diastolic,
+            borderColor: '#3498db',
+            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 3,
+          },
+          {
+            label: 'Pulse',
+            data: chartData.pulse,
+            borderColor: '#9b59b6',
+            backgroundColor: 'rgba(155, 89, 182, 0.05)',
+            borderDash: [5, 5],
+            tension: 0.3,
+            pointRadius: 3,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'top' }
+        },
+        scales: {
+          x: { title: { display: true, text: 'Date/Time' } },
+          y: { title: { display: true, text: 'Value' } }
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="mb-1">{{ patient.user.get_full_name }}'s Readings</h2>
+    <p class="text-muted mb-0">View your blood pressure and pulse history</p>
+  </div>
+  <a href="{% url 'ble_simulator' %}" class="btn btn-primary">
+    <i class="fa-solid fa-bolt me-2"></i>BLE Simulator
+  </a>
+</div>
+
+{% if readings %}
+<div class="card">
+  <div class="card-header">
+    <i class="fa-solid fa-chart-line me-2"></i>Readings over time
+  </div>
+  <div class="card-body" style="height: 350px;">
+    <canvas id="readingsChart"></canvas>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <i class="fa-solid fa-table-list me-2"></i>Detailed Readings
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-striped table-hover mb-0">
+        <thead class="table-dark">
+          <tr>
+            <th>Date/Time</th>
+            <th>Systolic</th>
+            <th>Diastolic</th>
+            <th>Pulse</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for reading in readings %}
+          <tr class="reading-{{ reading.status }}">
+            <td>{{ reading.created_at }}</td>
+            <td>{{ reading.systolic }} mmHg</td>
+            <td>{{ reading.diastolic }} mmHg</td>
+            <td>{{ reading.pulse }} bpm</td>
+            <td>
+              {% if reading.status == 'Normal' %}
+              <span class="badge bg-success">Normal</span>
+              {% else %}
+              <span class="badge bg-danger">Abnormal</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="card text-center py-5">
+  <div class="card-body">
+    <i class="fa-solid fa-heart-pulse fa-4x text-muted mb-3"></i>
+    <h4>No readings yet</h4>
+    <p class="text-muted">Simulate a BLE reading to get started.</p>
+    <a href="{% url 'ble_simulator' %}" class="btn btn-primary">Go to BLE Simulator</a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

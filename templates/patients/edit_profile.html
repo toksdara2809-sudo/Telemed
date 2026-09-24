@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Profile - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center my-4">
+    <div class="col-lg-10">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-bold mb-0"><i class="fa-solid fa-user-edit me-2 text-primary"></i>Edit Profile</h3>
+            <a href="{% url 'dashboard_home' %}" class="btn btn-outline-secondary">
+                <i class="fa-solid fa-arrow-left me-1"></i>Back to Dashboard
+            </a>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="row">
+
+                <!-- User Account Info -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <i class="fa-solid fa-user me-2 text-primary"></i>Account Information
+                        </div>
+                        <div class="card-body">
+
+                            {% if user_form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    {% for error in user_form.non_field_errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <div class="mb-3">
+                                <label for="id_first_name" class="form-label">First Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                                    {{ user_form.first_name }}
+                                </div>
+                                {% if user_form.first_name.errors %}
+                                    <div class="text-danger small mt-1">{{ user_form.first_name.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="id_last_name" class="form-label">Last Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                                    {{ user_form.last_name }}
+                                </div>
+                                {% if user_form.last_name.errors %}
+                                    <div class="text-danger small mt-1">{{ user_form.last_name.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="id_email" class="form-label">Email Address</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
+                                    {{ user_form.email }}
+                                </div>
+                                {% if user_form.email.errors %}
+                                    <div class="text-danger small mt-1">{{ user_form.email.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Medical Profile Info -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <i class="fa-solid fa-notes-medical me-2 text-primary"></i>Medical Information
+                        </div>
+                        <div class="card-body">
+
+                            {% if profile_form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    {% for error in profile_form.non_field_errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <div class="mb-3">
+                                <label for="id_date_of_birth" class="form-label">Date of Birth</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-calendar"></i></span>
+                                    {{ profile_form.date_of_birth }}
+                                </div>
+                                {% if profile_form.date_of_birth.errors %}
+                                    <div class="text-danger small mt-1">{{ profile_form.date_of_birth.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="id_gender" class="form-label">Gender</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-venus-mars"></i></span>
+                                    {{ profile_form.gender }}
+                                </div>
+                                {% if profile_form.gender.errors %}
+                                    <div class="text-danger small mt-1">{{ profile_form.gender.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="id_contact_number" class="form-label">Contact Number</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+                                    {{ profile_form.contact_number }}
+                                </div>
+                                {% if profile_form.contact_number.errors %}
+                                    <div class="text-danger small mt-1">{{ profile_form.contact_number.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="id_blood_group" class="form-label">Blood Group</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-droplet"></i></span>
+                                    {{ profile_form.blood_group }}
+                                </div>
+                                {% if profile_form.blood_group.errors %}
+                                    <div class="text-danger small mt-1">{{ profile_form.blood_group.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="id_allergies" class="form-label">Allergies</label>
+                                {{ profile_form.allergies }}
+                                {% if profile_form.allergies.errors %}
+                                    <div class="text-danger small mt-1">{{ profile_form.allergies.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Emergency Contact & Address -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <i class="fa-solid fa-phone-volume me-2 text-danger"></i>Emergency Contact
+                        </div>
+                        <div class="card-body">
+
+                            <div class="mb-3">
+                                <label for="id_emergency_contact_name" class="form-label">Contact Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-user-shield"></i></span>
+                                    {{ profile_form.emergency_contact_name }}
+                                </div>
+                                {% if profile_form.emergency_contact_name.errors %}
+                                    <div class="text-danger small mt-1">{{ profile_form.emergency_contact_name.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="id_emergency_contact_phone" class="form-label">Contact Phone</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+                                    {{ profile_form.emergency_contact_phone }}
+                                </div>
+                                {% if profile_form.emergency_contact_phone.errors %}
+                                    <div class="text-danger small mt-1">{{ profile_form.emergency_contact_phone.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <i class="fa-solid fa-location-dot me-2 text-primary"></i>Address
+                        </div>
+                        <div class="card-body">
+
+                            <div class="mb-3">
+                                <label for="id_address" class="form-label">Home Address</label>
+                                {{ profile_form.address }}
+                                {% if profile_form.address.errors %}
+                                    <div class="text-danger small mt-1">{{ profile_form.address.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="d-grid mt-4">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fa-solid fa-save me-2"></i>Save Changes
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card .form-control,
+    .card .form-select,
+    .card textarea {
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        padding: 0.5rem 0.75rem;
+    }
+    .card .form-control:focus,
+    .card .form-select:focus,
+    .card textarea:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.15);
+    }
+    .card textarea {
+        min-height: 80px;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block title %}Doctor Dashboard - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-0"><i class="fa-solid fa-user-doctor me-2"></i>Dr. {{ doctor.user.get_full_name }}</h2>
+        <small class="text-muted"><i class="fa-solid fa-stethoscope me-1"></i>{{ doctor.specialization }}</small>
+    </div>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card h-100 text-center p-4 hover-lift border-start border-primary border-4">
+            <div class="card-body">
+                <div class="mb-3">
+                    <i class="fa-solid fa-calendar-check fa-2x text-primary"></i>
+                </div>
+                <h2 class="fw-bold mb-0">{{ today_appointments|length }}</h2>
+                <h6 class="card-title fw-semibold mt-1">Today's Appointments</h6>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 text-center p-4 hover-lift border-start border-warning border-4">
+            <div class="card-body">
+                <div class="mb-3">
+                    <i class="fa-solid fa-hourglass-half fa-2x text-warning"></i>
+                </div>
+                <h2 class="fw-bold mb-0">{{ pending_appointments|length }}</h2>
+                <h6 class="card-title fw-semibold mt-1">Pending Approvals</h6>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 text-center p-4 hover-lift border-start border-success border-4">
+            <div class="card-body">
+                <div class="mb-3">
+                    <i class="fa-solid fa-video fa-2x text-success"></i>
+                </div>
+                <h2 class="fw-bold mb-0">{{ active_consultations|length }}</h2>
+                <h6 class="card-title fw-semibold mt-1">Active Consultations</h6>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Today's Appointments -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fa-solid fa-calendar-day me-2"></i>Today's Appointments</h5>
+    </div>
+    <div class="card-body p-0">
+        {% if today_appointments %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Time</th>
+                            <th>Patient</th>
+                            <th>Status</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in today_appointments %}
+                            <tr>
+                                <td>{{ a.time_slot|time:"h:i A" }}</td>
+                                <td>{{ a.patient.user.get_full_name }}</td>
+                                <td>
+                                    {% if a.status == 'pending' %}
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                    {% elif a.status == 'approved' %}
+                                        <span class="badge bg-success">Approved</span>
+                                    {% elif a.status == 'completed' %}
+                                        <span class="badge bg-info">Completed</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if a.status == 'approved' %}
+                                        <a href="{% url 'consultation_room' a.id %}" class="btn btn-sm btn-primary">
+                                            <i class="fa-solid fa-video me-1"></i>Start Consultation
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="fa-regular fa-calendar-xmark fa-2x mb-2"></i>
+                <p class="mb-0">No appointments scheduled for today.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Pending Approvals -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fa-solid fa-clock-rotate-left me-2"></i>Pending Approvals</h5>
+    </div>
+    <div class="card-body p-0">
+        {% if pending_appointments %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Patient</th>
+                            <th>Reason</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in pending_appointments %}
+                            <tr>
+                                <td>{{ a.date|date:"M d, Y" }}</td>
+                                <td>{{ a.time_slot|time:"h:i A" }}</td>
+                                <td>{{ a.patient.user.get_full_name }}</td>
+                                <td>{{ a.reason|default:"N/A" }}</td>
+                                <td class="text-center">
+                                    <form method="POST" action="{% url 'update_appointment_status' a.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="approve">
+                                        <button type="submit" class="btn btn-sm btn-success me-1" title="Approve">
+                                            <i class="fa-solid fa-check"></i>
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{% url 'update_appointment_status' a.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="reject">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Reject">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="fa-regular fa-circle-check fa-2x mb-2"></i>
+                <p class="mb-0">No pending approvals. All caught up!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Active Consultations -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fa-solid fa-comments me-2"></i>Active Consultations</h5>
+    </div>
+    <div class="card-body">
+        {% if active_consultations %}
+            <ul class="list-group list-group-flush">
+                {% for c in active_consultations %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <div>
+                            <div class="fw-semibold">{{ c.patient.user.get_full_name }}</div>
+                            <small class="text-muted">Started {{ c.created_at|timesince }} ago</small>
+                        </div>
+                        <a href="{% url 'consultation_room' c.appointment.id %}" class="btn btn-sm btn-primary">
+                            <i class="fa-solid fa-door-open me-1"></i>Join Room
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="text-center py-4 text-muted">
+                <i class="fa-regular fa-comments fa-2x mb-2"></i>
+                <p class="mb-0">No active consultations at the moment.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

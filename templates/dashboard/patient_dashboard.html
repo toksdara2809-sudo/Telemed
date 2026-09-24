@@ -1,0 +1,320 @@
+{% extends 'base.html' %}
+
+{% block title %}Patient Dashboard - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0"><i class="fa-solid fa-house-medical me-2"></i>Welcome, {{ patient.user.get_full_name }}</h2>
+</div>
+
+<!-- Quick Action Stats Row -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <a href="{% url 'book_appointment' %}" class="text-decoration-none">
+            <div class="card h-100 text-center p-4 hover-lift border-start border-primary border-4">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="fa-solid fa-calendar-plus fa-2x text-primary"></i>
+                    </div>
+                    <h6 class="card-title fw-semibold">Book Appointment</h6>
+                    <p class="card-text small text-muted mb-0">Schedule a new consultation</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{% url 'view_my_records' %}" class="text-decoration-none">
+            <div class="card h-100 text-center p-4 hover-lift border-start border-success border-4">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="fa-solid fa-file-medical fa-2x text-success"></i>
+                    </div>
+                    <h6 class="card-title fw-semibold">View EMR</h6>
+                    <p class="card-text small text-muted mb-0">Access your medical records</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{% url 'ai_diagnosis' %}" class="text-decoration-none">
+            <div class="card h-100 text-center p-4 hover-lift border-start border-warning border-4">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="fa-solid fa-brain fa-2x text-warning"></i>
+                    </div>
+                    <h6 class="card-title fw-semibold">AI Symptom Check</h6>
+                    <p class="card-text small text-muted mb-0">Check symptoms with AI</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{% url 'view_readings' %}" class="text-decoration-none">
+            <div class="card h-100 text-center p-4 hover-lift border-start border-danger border-4">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="fa-solid fa-heart-pulse fa-2x text-danger"></i>
+                    </div>
+                    <h6 class="card-title fw-semibold">Health Devices</h6>
+                    <p class="card-text small text-muted mb-0">View connected device data</p>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Upcoming Appointments -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fa-solid fa-calendar-days me-2"></i>Upcoming Appointments</h5>
+    </div>
+    <div class="card-body p-0">
+        {% if upcoming_appointments %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Doctor</th>
+                            <th>Status</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in upcoming_appointments %}
+                            <tr>
+                                <td>{{ a.date|date:"M d, Y" }}</td>
+                                <td>{{ a.time_slot|time:"h:i A" }}</td>
+                                <td>Dr. {{ a.doctor.user.get_full_name }}</td>
+                                <td>
+                                    {% if a.status == 'pending' %}
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                    {% elif a.status == 'approved' %}
+                                        <span class="badge bg-success">Approved</span>
+                                    {% elif a.status == 'completed' %}
+                                        <span class="badge bg-info">Completed</span>
+                                    {% elif a.status == 'cancelled' %}
+                                        <span class="badge bg-secondary">Cancelled</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if a.status == 'pending' or a.status == 'approved' %}
+                                        <a href="{% url 'cancel_appointment' a.id %}" class="btn btn-sm btn-outline-danger me-1" title="Cancel">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </a>
+                                    {% endif %}
+                                    {% if a.status == 'approved' %}
+                                        <a href="{% url 'consultation_room' a.id %}" class="btn btn-sm btn-primary" title="Start Consultation">
+                                            <i class="fa-solid fa-video"></i>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="fa-regular fa-calendar-xmark fa-2x mb-2"></i>
+                <p class="mb-0">No upcoming appointments.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Recent Consultations -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fa-solid fa-stethoscope me-2"></i>Recent Consultations</h5>
+            </div>
+            <div class="card-body">
+                {% if consultations %}
+                    <ul class="list-group list-group-flush">
+                        {% for c in consultations %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <div>
+                                    <div class="fw-semibold">Dr. {{ c.doctor.user.get_full_name }}</div>
+                                    <small class="text-muted">{{ c.created_at|date:"M d, Y" }}</small>
+                                </div>
+                                <a href="{% url 'consultation_room' c.appointment.id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fa-solid fa-door-open me-1"></i>View
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="fa-regular fa-comments fa-2x mb-2"></i>
+                        <p class="mb-0">No consultations yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Medical Records -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fa-solid fa-file-medical me-2"></i>Recent Medical Records</h5>
+            </div>
+            <div class="card-body">
+                {% if records_summary %}
+                    <ul class="list-group list-group-flush">
+                        {% for record in records_summary %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <div>
+                                    <div class="fw-semibold">{{ record.diagnosis }}</div>
+                                    <small class="text-muted">Dr. {{ record.doctor.user.get_full_name }} &middot; {{ record.created_at|date:"M d, Y" }}</small>
+                                </div>
+                                <a href="{% url 'view_my_records' %}" class="btn btn-sm btn-outline-success">
+                                    <i class="fa-solid fa-eye me-1"></i>View EMR
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="fa-regular fa-file fa-2x mb-2"></i>
+                        <p class="mb-0">No medical records found.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Active Prescriptions -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fa-solid fa-prescription-bottle-medical me-2"></i>Active Prescriptions</h5>
+    </div>
+    <div class="card-body p-0">
+        {% if active_prescriptions %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Prescription</th>
+                            <th>Doctor</th>
+                            <th>Date</th>
+                            <th>Items</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in active_prescriptions %}
+                            <tr>
+                                <td class="fw-semibold">#{{ p.id }}</td>
+                                <td>{% if p.doctor %}Dr. {{ p.doctor.user.get_full_name }}{% else %}<span class="badge bg-warning text-dark">AI Generated</span>{% endif %}</td>
+                                <td>{{ p.created_at|date:"M d, Y" }}</td>
+                                <td><span class="badge bg-secondary">{{ p.items.count }}</span></td>
+                                <td class="text-center">
+                                    <a href="{% url 'download_prescription_pdf' p.id %}" class="btn btn-sm btn-outline-danger" title="Download PDF">
+                                        <i class="fa-solid fa-file-pdf me-1"></i>PDF
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="fa-regular fa-pen-to-square fa-2x mb-2"></i>
+                <p class="mb-0">No active prescriptions.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Appointment History with Filtering -->
+<div class="card mt-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fa-solid fa-clock-rotate-left me-2"></i>Appointment History</h5>
+        <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#filterPanel">
+            <i class="fa-solid fa-filter me-1"></i>Filter
+        </button>
+    </div>
+    <div class="collapse" id="filterPanel">
+        <div class="card-body border-bottom bg-light">
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-auto">
+                    <label class="form-label small mb-0">Status</label>
+                    <select name="status" class="form-select form-select-sm">
+                        <option value="">All</option>
+                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Approved</option>
+                        <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                        <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                        <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <label class="form-label small mb-0">From</label>
+                    <input type="date" name="date_from" class="form-control form-control-sm" value="{{ date_from }}">
+                </div>
+                <div class="col-auto">
+                    <label class="form-label small mb-0">To</label>
+                    <input type="date" name="date_to" class="form-control form-control-sm" value="{{ date_to }}">
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-sm btn-primary"><i class="fa-solid fa-search me-1"></i>Apply</button>
+                    <a href="{% url 'dashboard_patient' %}" class="btn btn-sm btn-outline-secondary">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Doctor</th>
+                        <th>Status</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in all_appointments %}
+                        <tr>
+                            <td>{{ a.date|date:"M d, Y" }}</td>
+                            <td>{{ a.time_slot|time:"h:i A" }}</td>
+                            <td>Dr. {{ a.doctor.user.get_full_name }}</td>
+                            <td>
+                                {% if a.status == 'pending' %}<span class="badge bg-warning text-dark">Pending</span>
+                                {% elif a.status == 'approved' %}<span class="badge bg-success">Approved</span>
+                                {% elif a.status == 'completed' %}<span class="badge bg-info">Completed</span>
+                                {% elif a.status == 'cancelled' %}<span class="badge bg-secondary">Cancelled</span>
+                                {% elif a.status == 'rejected' %}<span class="badge bg-danger">Rejected</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {% if a.status == 'approved' %}
+                                    <a href="{% url 'consultation_room' a.id %}" class="btn btn-sm btn-primary" title="Enter Consultation">
+                                        <i class="fa-solid fa-video"></i>
+                                    </a>
+                                {% endif %}
+                                {% if a.status == 'pending' or a.status == 'approved' %}
+                                    <a href="{% url 'cancel_appointment' a.id %}" class="btn btn-sm btn-outline-danger" title="Cancel"
+                                       onclick="return confirm('Cancel this appointment?')">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="5" class="text-center py-4 text-muted">No appointments match your filters.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

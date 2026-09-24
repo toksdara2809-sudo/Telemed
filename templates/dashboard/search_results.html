@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Results - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h2 class="fw-bold"><i class="fa-solid fa-magnifying-glass me-2"></i>Search results for '{{ query }}'</h2>
+</div>
+
+<!-- Doctors Results -->
+{% if doctors %}
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fa-solid fa-user-doctor me-2"></i>Doctors</h5>
+            <span class="badge bg-primary">{{ doctors|length }}</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>Specialization</th>
+                            <th>Consultation Fee</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for doc in doctors %}
+                            <tr>
+                                <td class="fw-semibold">Dr. {{ doc.user.get_full_name }}</td>
+                                <td>{{ doc.specialization }}</td>
+                                <td>${{ doc.consultation_fee }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% if doctors.has_other_pages %}
+        <nav class="mb-4">
+            <ul class="pagination justify-content-center">
+                {% if doctors.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?q={{ query }}&doctors_page={{ doctors.previous_page_number }}">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+                {% for num in doctors.paginator.page_range %}
+                    <li class="page-item {% if doctors.number == num %}active{% endif %}">
+                        <a class="page-link" href="?q={{ query }}&doctors_page={{ num }}">{{ num }}</a>
+                    </li>
+                {% endfor %}
+                {% if doctors.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?q={{ query }}&doctors_page={{ doctors.next_page_number }}">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+{% endif %}
+
+<!-- Patients Results -->
+{% if patients %}
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fa-solid fa-users me-2"></i>Patients</h5>
+            <span class="badge bg-success">{{ patients|length }}</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>Blood Group</th>
+                            <th>Contact</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pat in patients %}
+                            <tr>
+                                <td class="fw-semibold">{{ pat.user.get_full_name }}</td>
+                                <td>{{ pat.blood_group|default:"N/A" }}</td>
+                                <td>{{ pat.user.email }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% if patients.has_other_pages %}
+        <nav class="mb-4">
+            <ul class="pagination justify-content-center">
+                {% if patients.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?q={{ query }}&patients_page={{ patients.previous_page_number }}">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+                {% for num in patients.paginator.page_range %}
+                    <li class="page-item {% if patients.number == num %}active{% endif %}">
+                        <a class="page-link" href="?q={{ query }}&patients_page={{ num }}">{{ num }}</a>
+                    </li>
+                {% endfor %}
+                {% if patients.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?q={{ query }}&patients_page={{ patients.next_page_number }}">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+{% endif %}
+
+<!-- Appointments Results -->
+{% if appointments %}
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fa-solid fa-calendar-days me-2"></i>Appointments</h5>
+            <span class="badge bg-info text-dark">{{ appointments|length }}</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Patient</th>
+                            <th>Doctor</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in appointments %}
+                            <tr>
+                                <td>{{ a.patient.user.get_full_name }}</td>
+                                <td>Dr. {{ a.doctor.user.get_full_name }}</td>
+                                <td>{{ a.date|date:"M d, Y" }} {{ a.time_slot|time:"h:i A" }}</td>
+                                <td>
+                                    {% if a.status == 'pending' %}
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                    {% elif a.status == 'approved' %}
+                                        <span class="badge bg-success">Approved</span>
+                                    {% elif a.status == 'completed' %}
+                                        <span class="badge bg-info">Completed</span>
+                                    {% elif a.status == 'cancelled' %}
+                                        <span class="badge bg-secondary">Cancelled</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% if appointments.has_other_pages %}
+        <nav class="mb-4">
+            <ul class="pagination justify-content-center">
+                {% if appointments.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?q={{ query }}&appointments_page={{ appointments.previous_page_number }}">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+                {% for num in appointments.paginator.page_range %}
+                    <li class="page-item {% if appointments.number == num %}active{% endif %}">
+                        <a class="page-link" href="?q={{ query }}&appointments_page={{ num }}">{{ num }}</a>
+                    </li>
+                {% endfor %}
+                {% if appointments.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?q={{ query }}&appointments_page={{ appointments.next_page_number }}">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+{% endif %}
+
+<!-- No Results -->
+{% if not doctors and not patients and not appointments %}
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="fa-solid fa-magnifying-glass fa-3x text-muted mb-3"></i>
+            <h4 class="text-muted">No results found</h4>
+            <p class="text-muted mb-0">Try adjusting your search terms or check for typos.</p>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

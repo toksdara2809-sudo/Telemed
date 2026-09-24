@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Prescription - {{ prescription.id }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; font-size: 12px; color: #333; padding: 40px; }
+        .letterhead { text-align: center; border-bottom: 2px solid #4361ee; padding-bottom: 20px; margin-bottom: 30px; }
+        .letterhead h1 { font-size: 24px; color: #4361ee; margin-bottom: 5px; }
+        .letterhead p { font-size: 11px; color: #666; }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .info-block { width: 48%; }
+        .info-block h3 { font-size: 13px; color: #4361ee; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 8px; }
+        .info-block p { margin-bottom: 3px; font-size: 11px; }
+        .info-block strong { display: inline-block; width: 80px; }
+        .date-line { text-align: right; margin-bottom: 20px; font-size: 11px; color: #666; }
+        .items-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        .items-table th { background-color: #4361ee; color: #fff; padding: 8px 12px; text-align: left; font-size: 11px; }
+        .items-table td { padding: 8px 12px; border-bottom: 1px solid #eee; font-size: 11px; }
+        .items-table tr:nth-child(even) td { background-color: #f9f9f9; }
+        .notes { margin-bottom: 30px; padding: 12px; background-color: #f8f9fa; border-left: 3px solid #4361ee; font-size: 11px; }
+        .signature-area { margin-top: 60px; display: flex; justify-content: flex-end; }
+        .signature-box { width: 200px; text-align: center; border-top: 1px solid #333; padding-top: 5px; }
+        .signature-box p { font-size: 11px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="letterhead">
+        <h1>{{ SITE_NAME }}</h1>
+        <p>{{ SITE_TAGLINE }}</p>
+        <p>123 Healthcare Avenue, Medical District, Lagos, Nigeria</p>
+        <p>Tel: +234 800 123 4567 | Email: info@pticlinic.com</p>
+    </div>
+
+    <div class="info-row">
+        <div class="info-block">
+            <h3>Doctor</h3>
+            <p><strong>Name:</strong> {% if prescription.doctor %}{{ prescription.doctor.user.get_full_name|default:prescription.doctor.user.username }}{% else %}AI Generated (Pending Doctor Review){% endif %}</p>
+            <p><strong>Specialization:</strong> {% if prescription.doctor %}{{ prescription.doctor.specialization }}{% else %}—{% endif %}</p>
+        </div>
+        <div class="info-block">
+            <h3>Patient</h3>
+            <p><strong>Name:</strong> {{ prescription.patient.user.get_full_name|default:prescription.patient.user.username }}</p>
+            <p><strong>ID:</strong> {{ prescription.patient.id }}</p>
+        </div>
+    </div>
+
+    <div class="date-line">
+        <strong>Date:</strong> {{ prescription.created_at|date:"F d, Y" }}
+    </div>
+
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>Medication</th>
+                <th>Dosage</th>
+                <th>Frequency</th>
+                <th>Duration</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in prescription.items.all %}
+                <tr>
+                    <td>{{ item.medication_name }}</td>
+                    <td>{{ item.dosage }}</td>
+                    <td>{{ item.frequency }}</td>
+                    <td>{{ item.duration }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4" style="text-align: center; color: #999;">No medications prescribed</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if prescription.additional_notes %}
+        <div class="notes">
+            <strong>Notes:</strong> {{ prescription.additional_notes }}
+        </div>
+    {% endif %}
+
+    <div class="signature-area">
+        <div class="signature-box">
+            <p>{% if prescription.doctor %}{{ prescription.doctor.user.get_full_name|default:prescription.doctor.user.username }}{% else %}Pending Doctor Review{% endif %}</p>
+            <p style="font-size: 10px; color: #999;">Authorized Signature</p>
+        </div>
+    </div>
+</body>
+</html>

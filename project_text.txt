@@ -1,0 +1,498 @@
+DEVELOPMENT OF DESIGN AND IMPLEMENTATION OF A TELEMEDICINE WEB APPLICATION
+(A CASE STUDY OF PTI CLINIC)
+
+PRESENTED BY
+
+LAWAL IYINTOSOLUWA GBOGBOADE
+M.24/HND/SWD/11581
+
+TO
+
+A PROJECT SUBMITTED TO THE DEPARTMENT OF COMPUTER SCIENCE IN PARTIAL FULFILMENT OF THE REQUIREMENTS FOR THE AWARD OF HIGHER DIPLOMA OF COMPUTER SCIENCE (SOFTWARE AND WEB DEVELOPMENT)
+
+
+PETROLEUM TRAINING INSTITUTE 
+
+PMB 20, EFFURUN,
+
+DELTA STATE,
+
+NIGERIA. 
+
+
+SEPTEMBER 2026
+
+CERTIFICATION
+This is to certify that this project titled “Development of Design and Implementation of a Telemedicine Web Application. A Case Study of PTI Clinic” was carried out by LAWAL IYINTOSOLUWA GBOGBOADE with Matriculation Number M.24/HND/SWD/11581, under my supervision, and is submitted in partial fulfilment of the requirements for the award of the Higher National Diploma (HND) in Computer Science (Software and Web Development Option)
+
+______________________
+MRS ROLINDA OSHASHA
+Project Supervisor
+Date: _________
+
+
+
+______________________
+DR NGONADI V. IFEOMA
+Head of Department
+Date: _________________
+
+
+
+
+
+DEDICATION
+This project is dedicated to GOD Almighty, My Mother and to My Spiritual Parents.
+
+ACKNOWLEDGEMENT
+Firstly, I will like to appreciate The Person of The Holy Spirit for the inspiration through the building and entire process of this Project Work. 
+I wish to express my sincere gratitude to my supervisor, Mrs Rolinda Oshasha for her guidance, patience, and constructive feedback provided throughout the duration of this project.
+I also appreciate the entire faculty of the Department of Computer Science, Petroleum Training Institute for the knowledge and support given throughout the course of my HND Program.
+My Acknowledgement won’t be complete without appreciating my Mother for her unwavering support through my success and failures as a man and still never depreciating in her love and support. I love you ma.
+My profound gratitude also goes to my Spiritual Mother who is the inspiration behind this Project Build and friends Obafemi and Emmanuel for their unwavering support, encouragement, and understanding during the course of this project.
+Finally, I thank everyone who, in one way or another, contributed to the successful completion of this work.
+God Bless You All
+
+
+ABSTRACT
+Access to timely, convenient healthcare remains a challenge in many communities, particularly where distance, cost, and limited clinic hours restrict access to qualified care. Using PTI Clinic as a case study, this project examined the clinic's existing manual, in-person process for registration, appointment booking, and record-keeping, and identified the absence of a digital platform for remote consultation and record management as the central problem this study addresses.
+To address this problem, TeleMed was designed and implemented following an Agile methodology, using Django (Python), MySQL, and Bootstrap 5. The system adopts a modular architecture spanning authentication, patient, doctor, appointment, consultation, records, prescription, notification, search, reports, and dashboard components. A distinguishing feature is its Devices component, integrating real-time vital sign monitoring via the Web Bluetooth API for compatible BLE monitors, with a simulator mode for demonstration, plus a scikit-learn symptom-to-condition classifier providing non-diagnostic decision support. The system was evaluated via unit and functional testing covering authentication, appointment conflict logic, and the AI diagnosis service.
+Results show that TeleMed replicates core functionalities of commercial telemedicine platforms such as Teladoc and Amwell, while adding IoT integration and ML-based decision support suited to a low-resource, appointment-driven context. The project concludes by recommending future enhancements, particularly real-time video consultation via WebRTC.
+
+
+
+TABLE OF CONTENTS
+
+CHAPTER ONE
+ INTRODUCTION
+Background of the Study
+Healthcare delivery has traditionally relied on in-person consultations between patients and medical practitioners. While effective, this model presents several limitations, including geographical barriers, long waiting times, high costs of transportation, and limited access to specialists, particularly in underserved or rural areas. The emergence of Information and Communication Technology (ICT) has given rise to telemedicine the use of electronic communication and software technologies to provide clinical services to patients without requiring an in-person visit.
+Globally, platforms such as Teladoc Health, Amwell, and MDLIVE have demonstrated that virtual healthcare delivery can be both clinically effective and commercially viable, connecting patients to licensed physicians for general consultations, mental health support, and chronic disease management. These platforms have grown significantly, particularly following increased demand for remote healthcare services in recent years.
+Despite the proliferation of telemedicine platforms internationally, many existing solutions are either proprietary, expensive to license, or not tailored to the specific workflow needs of smaller clinics and low-resource environments. PTI Clinic, the case study organisation for this project, currently relies on an in-person, largely paper-based process for patient registration, appointment scheduling, and record-keeping, which reflects the workflow constraints typical of many small-to-medium healthcare facilities. This project, TeleMed, was conceived to design and implement a functional, end-to-end telemedicine web application, using PTI Clinic as a case study, that replicates the core capabilities of commercial platforms  appointment booking, virtual consultation, electronic medical records, and prescription management  while introducing additional features such as IoT-based vital sign monitoring and machine learning-assisted symptom analysis, within an academically defensible and extensible codebase.
+
+ Statement of the Problem
+Patients seeking medical attention are often constrained by the need to travel to a hospital or clinic, wait in long queues, and incur costs that could otherwise be minimised through remote consultation for non-emergency cases. At PTI Clinic specifically, appointments are booked in person, patient files are kept in paper folders that are difficult to retrieve and cross-reference, and there is no remote channel through which patients can consult a doctor for minor or follow-up complaints. Additionally, patient medical records are frequently kept in fragmented, paper-based formats that are difficult to retrieve, share between practitioners, or analyse over time.
+There is therefore a need for a system that allows patients to consult with doctors remotely, maintain a centralised and accessible digital medical history, receive and retrieve prescriptions electronically, and optionally monitor basic vital signs using low-cost consumer devices all within a single, role-based, secure platform.
+
+ Aim and Objectives
+Aim
+The aim of this project is to design and implement a web-based telemedicine platform, using PTI Clinic as a case study, that facilitates remote patient–doctor interaction, electronic medical record keeping, and decision-support diagnosis assistance.
+Objectives
+The specific objectives of the project are to:
+Design and implement a role-based authentication system distinguishing between patient, doctor, and administrator users.
+Develop modules for patient and doctor profile management, including doctor availability scheduling.
+Implement an appointment booking and approval workflow that prevents scheduling conflicts.
+Develop a chat-based virtual consultation module linked to approve appointments.
+Implement an Electronic Medical Records (EMR) module and a prescription generation module with PDF export.
+Integrate a notification system to alert users of relevant events within the platform.
+Implement global search and administrative reporting functionality.
+Integrate IoT-based blood pressure monitoring using the Web Bluetooth API, including a simulator mode for demonstration purposes.
+Design, train, and integrate a machine learning model capable of providing symptom-based, non-diagnostic condition suggestions.
+Evaluate the completed system through unit and functional testing.
+
+ Scope of the Study
+This project covers the design, development, and testing of a web-based telemedicine application, using the workflow of PTI Clinic as a case study, comprising eleven functional modules: authentication, patients, doctors, appointments, consultations, medical records, prescriptions, notifications, search, reports, and devices (IoT and AI diagnosis). The study is limited to PTI Clinic's patient registration, appointment, and record-keeping workflow as the basis for requirements gathering, and does not extend to a live deployment or data migration for the clinic. The consultation module is limited to text-based chat; real-time video/audio consultation via WebRTC is identified as a future extension and is not implemented in the current version. The AI diagnosis component is scoped as a decision-support tool based on a symptom-to-condition classifier trained on a publicly available dataset and is explicitly not intended to serve as a certified medical diagnostic instrument.
+
+ Significance of the Study
+This project is significant in that it demonstrates the practical feasibility of building a full-featured telemedicine platform using open-source and freely accessible technologies (Django, MySQL, Bootstrap, scikit-learn), making the approach reproducible for institutions or small clinics with limited budgets. It also contributes an example of integrating consumer IoT devices via the Web Bluetooth API and machine learning-based decision support into a conventional web application, an area with growing relevance in digital health.
+
+ Limitations of the Study
+The system was developed and tested within an academic timeframe and environment, and as such:
+Video/audio consultation was not implemented; only chat-based consultation is available.
+
+The AI diagnosis module is trained on a limited, publicly available dataset and is not clinically validated or certified for real diagnostic use.
+IoT integration via Web Bluetooth is dependent on browser support (currently limited primarily to Chromium-based browsers) and compatible BLE hardware; a simulator mode is provided to mitigate this constraint during demonstration.
+The system was tested locally using XAMPP/MySQL rather than deployed to a production hosting environment.
+
+ Definition of Terms
+Telemedicine: The remote delivery of healthcare services using telecommunications technology.
+EMR (Electronic Medical Record): A digital version of a patient's medical history maintained by a healthcare provider.
+RBAC (Role-Based Access Control): A method of restricting system access based on the roles of individual users.
+BLE (Bluetooth Low Energy): A wireless communication protocol designed for low-power short-range data exchange, commonly used in health-monitoring devices.
+GATT (Generic Attribute Profile): A specification for how BLE devices exchange data using services and characteristics.
+API (Application Programming Interface): A set of protocols that allow different software components to communicate.
+CHAPTER TWO
+LITERATURE REVIEW
+INTRODUCTION
+Telemedicine refers to the use of telecommunications technology to deliver clinical healthcare services remotely, encompassing live video or chat consultations, remote patient monitoring, and asynchronous transmission of medical data such as images or lab results for review by a specialist. It is distinguished from the broader term “telehealth”, which additionally includes non-clinical services such as provider training and administrative meetings conducted remotely.
+The adoption of telemedicine has accelerated over the past decade, driven by improvements in internet connectivity, smartphone penetration, and, more recently, heightened demand for remote healthcare options. Telemedicine platforms typically combine several core capabilities: user registration and identity verification, appointment scheduling, secure communication channels, electronic documentation, and, increasingly, integration with wearable or home use medical devices for remote monitoring.
+
+Conceptual Review
+This section clarifies the core concepts underpinning TeleMed, establishing a shared understanding of the terms and technologies referenced throughout this study.
+Telemedicine and Telehealth: The World Health Organization's Global Observatory for eHealth defines telemedicine broadly as the use of telecommunications technology to deliver healthcare services, information, and education across a distance, and notes that the term is sometimes distinguished from "telehealth" on the basis that telemedicine is restricted to service delivery by clinicians, while telehealth signifies services provided by health professionals more generally, including nurses and pharmacists (World Health Organization, 2010). This project adopts the narrower, clinical definition of telemedicine consistent with TeleMed's scope: patient registration, doctor-patient consultation, prescription, and records management.
+
+Electronic Medical Records (EMR): An EMR is a digital equivalent of a patient's paper chart, maintained by a single provider or clinic, containing a structured, longitudinal history of a patient's diagnoses, prescriptions, and consultation notes. Within TeleMed, the EMR component centralises this record so that a patient's consultation and prescription history remains accessible to their treating physicians across visits.
+
+Internet of Things (IoT) in Healthcare. IoT in a clinical context refers to networks of connected sensors and devices  such as wearable or home-use monitors  that capture physiological data and transmit it to a software system for storage, analysis, or clinical review. Healthcare IoT (HIoT) systems have been characterised from a clinical perspective as combining sensing, communication, and computing layers to support remote monitoring (Habibzadeh et al., 2020), and more recent systematic reviews of the "Internet of Medical Things" confirm that interoperable, standards-based device communication remains a central design concern for such systems (Huang et al., 2023). This motivates TeleMed's decision to build against the open Bluetooth SIG Blood Pressure Profile rather than a proprietary vendor SDK, so that any compliant BLE blood pressure monitor can be used.
+Machine Learning for Symptom-Based Decision Support. Supervised machine learning models  including decision trees, random forests, and gradient-boosted classifiers such as XGBoost  have been applied to symptom-to-disease prediction tasks using structured symptom checklists. In one recent study, symptom and disease data were used to train and compare several such algorithms, with XGBoost identified as a top-performing model due to its ability to handle complex, imbalanced relationships in the data (Sirigineedi et al., 2024). TeleMed's AI-assisted symptom analysis feature adopts a comparable supervised-learning approach, trained using scikit-learn, and is presented strictly as decision support rather than an autonomous diagnostic tool.
+
+Role-Based Access Control (RBAC): RBAC is a security model in which system permissions are assigned according to a user's role (e.g., patient, doctor, or administrator) rather than to individual users directly, simplifying access management and reducing the risk of unauthorised access to sensitive records. TeleMed implements RBAC to restrict functionality according to these three roles.
+
+Theoretical Framework
+This study is anchored on the Technology Acceptance Model (TAM explain and predict how users come to accept and use a given technology. TAM posits that a user's intention to use a system is jointly determined by two core beliefs: perceived usefulness (PU)  the degree to which a person believes that using a particular system would enhance their performance  and perceived ease of use (PEOU)  the degree to which a person believes that using the system would be free of effort. These two constructs shape a user's attitude toward the technology, which in turn drives behavioural intention and, ultimately, actual system use.
+
+TAM was selected over alternative adoption theories (such as the Theory of Planned Behaviour or the Unified Theory of Acceptance and Use of Technology) because of its parsimony and its extensive, well-validated application to healthcare technologies specifically.
+A recent study applying TAM to remote healthcare technology among doctors in India and Bhutan found that healthcare professionals generally held favourable perceptions of both the usefulness and ease of use of remote monitoring tools, while identifying security, privacy, and network reliability as the principal barriers to adoption (Jat et al., 2024). 
+
+These findings directly informed several design decisions in TeleMed.
+Application to TeleMed's design:
+
+While this project does not conduct an empirical TAM survey (as Jat et al., 2024 did), the model provides the theoretical justification for TeleMed's usability-oriented design choices, and offers a ready framework for evaluating real-world adoption once the system is piloted at PTI Clinic.
+
+ Review of Existing Telemedicine Systems
+A comparative review of established commercial telemedicine platforms was conducted to inform the design of the proposed system. The platforms reviewed include Teladoc Health, Amwell, and MDLIVE, each of which represents a mature, widely used implementation of telemedicine at scale.
+Teladoc Health
+Teladoc Health, founded in 2002 and headquartered in New York, is among the largest telemedicine providers globally, offering general medical consultations, mental health services (through its BetterHelp subsidiary), and chronic condition management, serving patients across numerous countries. The platform provides a marketing-oriented landing page that communicates its value proposition to visitors before they proceed to registration, a pattern common across mature commercial platforms and one that was identified as a gap in the early iteration of the proposed system.
+
+Amwell
+Amwell is a cloud-based telehealth platform noted for high mobile application adoption. Amwell supports urgent care, therapy, and specialist consultations, and offers both a consumer-facing application and a white label platform that healthcare organisations can license and customise.
+
+MDLIVE
+MDLIVE offers 24/7 medical and mental health visits and is frequently bundled into employer or insurer health plans. It is noted for transparent copay structures for insured members and for routing consultation summaries back to a patient's primary physician to support continuity of care.
+
+Practo
+Practo is a widely used telehealth and healthcare discovery platform, particularly prominent in South and Southeast Asian markets, that combines doctor discovery and appointment booking with online consultations, digital prescriptions, and a home-diagnostics ordering service. Unlike Teladoc, Amwell, and MDLIVE, which are largely payor- and employer-integrated in the United States market, Practo operates primarily as a direct-to-consumer marketplace connecting patients to independent clinics and practitioners, which more closely resembles the small-clinic context that motivates this project. Its inclusion in this review broadens the comparative baseline beyond large, vertically integrated providers to a platform model closer in scale and clinic-facing orientation to PTI Clinic.
+ Comparative Analysis
+The table below compares the reviewed commercial platforms with the proposed TeleMed system across key functional dimensions.
+Table 2.1: Comparative analysis of TeleMed against existing telemedicine platforms
+
+Gaps Identified
+The comparative review revealed that while commercial platforms are comprehensive, they are closed, proprietary systems that are not available for academic study, modification, or low-cost replication. Furthermore, few mainstream platforms expose or document integration with consumer-grade IoT health devices at the protocol level, and public-facing AI-based symptom checking is not commonly offered as an integrated, transparent feature with visible confidence scoring. These gaps directly informed the inclusion of the Devices module (IoT vital sign monitoring and AI-assisted symptom analysis) in the design of TeleMed.
+
+Review of Related Technologies
+Django Web Framework
+Django is a high-level Python web framework that follows the Model-View-Template (MVT) architectural pattern and promotes rapid, secure development through built-in components for authentication, object-relational mapping (ORM), form validation, and an administrative interface. Its “batteries-included” philosophy makes it well suited to a project requiring multiple interconnected modules, as it enforces a consistent structure across the authentication, patient, doctor, appointment, and other apps that make up TeleMed.
+
+ Relational Database Management (MySQL)
+MySQL is a widely used open-source relational database management system. Its use in this project, accessed through Django's ORM, ensures referential integrity between related entities such as patients, appointments, consultations, and medical records, while avoiding raw SQL injection risks through parameterised queries.
+
+Web Bluetooth API
+The Web Bluetooth API allows web applications running in a compatible browser to communicate directly with nearby Bluetooth Low Energy (BLE) devices without requiring a native mobile application. Many consumer blood pressure monitors implement the standard Bluetooth SIG Blood Pressure Profile (service UUID 0x1810), which defines a standard characteristic (0x2A35) for transmitting readings. Building against this standard profile, rather than a vendor-specific SDK, allows the system to generalise across compliant devices from multiple manufacturers.
+
+Machine Learning for Symptom-Based Decision Support
+Supervised classification algorithms, such as Random Forest and Gradient Boosting, have been applied in prior research to symptom-to-disease prediction tasks using structured symptom checklists. These models offer a reasonable balance between predictive accuracy and interpretability, the latter being particularly important in a healthcare decision-support context where a treating physician may need to understand why a given condition was suggested. This project adopts a similar approach, training a classifier on a publicly available symptom-disease dataset using the scikit-learn library.
+
+Review of Existing System
+Beyond the review of established commercial platforms, academic and applied research has consistently examined three themes directly relevant to this project: the effectiveness of remote consultation in reducing barriers to care, the integration of consumer-grade Internet of Things (IoT) devices into clinical workflows, and the use of machine learning as a decision-support rather than autonomous diagnostic tool.
+Studies of remote consultation adoption generally report that text and video based consultation channels reduce travel time and waiting-room exposure for patients with non-emergency complaints, while noting that consultation quality depends heavily on the completeness of the patient's presenting information, which motivates structured intake tools such as the symptom checklist implemented in this project. Research on remote patient monitoring similarly finds that low-cost, consumer Bluetooth Low Energy devices can meaningfully extend a clinician's visibility into a patient's condition between visits, provided that readings are captured through a standard, vendor-neutral protocol rather than a proprietary integration, which informed this project's decision to target the Bluetooth SIG Blood Pressure Profile directly rather than a single manufacturer's software development kit.
+Literature on machine learning in clinical decision support consistently emphasises that classifier output should be presented as an aid to, rather than a replacement for, clinical judgement, with confidence scores and clear disclaimers cited as minimum requirements for responsible deployment even in academic or prototype systems. This position directly shaped the design of the AI-assisted symptom analysis feature in TeleMed, which surfaces ranked, confidence-scored suggestions to both patient and doctor while explicitly withholding any autonomous diagnostic claim.
+Taken together, these strands of research support the central design premise of this project: that a small clinic such as PTI Clinic can adopt a subset of the capabilities found in large commercial telemedicine platforms remote consultation, digital records, IoT-based monitoring, and ML-assisted triage without the cost or vendor lock-in associated with proprietary enterprise systems.
+
+ Summary
+This chapter reviewed the concept of telemedicine and examined three established commercial platforms Teladoc, Amwell, and MDLIVE identifying common features as well as gaps relevant to an academic, extensible implementation. The technologies underpinning the proposed system, namely Django, MySQL, the Web Bluetooth API, and scikit-learn-based machine learning, were also reviewed. The next chapter presents the analysis and design of the proposed system.
+
+CHAPTER THREE 
+SYSTEM METHODOLOGY
+INTRODUCTION
+Analysis of the Existing System
+Prior to system design, the existing manual process at PTI Clinic, the case study organisation for this project, was analysed. At PTI Clinic, patients physically visit the clinic or call to book an appointment, wait to be attended to on a first-come or scheduled basis, and receive paper-based prescriptions and records that are kept in physical folders. These folders are difficult to retrieve quickly during a consultation due to the type of record keeping practiced. 
+Vital signs, where measured, are recorded manually on paper and are not tracked over time in a format that a doctor can easily review at a glance. This process is time-consuming for both staff and patients, prone to record loss or misfiling, and offers no remote consultation option for minor ailments or routine follow-up reviews, requiring patients to physically return to the clinic even for issues that could reasonably be handled remotely.
+
+Analysis of the Proposed System
+The proposed system, TeleMed, digitises and streamlines this process, using PTI Clinic's existing workflow as the reference case, by providing a single web-based platform through which patients can register, view doctor availability, book appointments, consult via chat once an appointment is approved, receive electronic prescriptions, and view their consolidated medical history at any time. 
+Doctors are able to manage their schedules, respond to consultations, and update patient records, while administrators oversee user accounts and system-wide reporting. The system additionally allows optional integration of a Bluetooth blood pressure monitor for remote vital sign tracking and offers a machine learning-based tool to help patients articulate symptoms before a consultation.
+ Development Methodology
+An incremental, module-by-module development methodology was adopted for this project, closely resembling an Agile approach adapted to a single-developer academic timeline. Each functional module (authentication, patients, doctors, appointments, consultations, medical records, prescriptions, notifications, search, reports, and devices) was treated as a self-contained increment: requirements for the module were confirmed against Section 3.3 below, the module was implemented as an independent Django application, it was manually tested in isolation, and only then was it integrated with previously completed modules. This approach was chosen over a strict waterfall model because it allowed early, working functionality (authentication and appointment booking) to be demonstrated and validated against the PTI Clinic case study workflow before more complex modules, such as IoT device integration and the AI diagnosis service, were attempted, reducing the risk of late-stage architectural rework.
+
+Each increment followed the same short cycle: define the module's models and relationships, implement views and forms, apply role-based access restrictions, build the corresponding templates, and write functional tests exercising the module's primary use cases before moving to the next module. Version control was maintained throughout using Git, with the code base organised as a single Django project (telemed_project) containing one app per functional module, consistent with the architecture described in Section 3.5.
+System Requirements
+Functional Requirements
+The system shall allow patients to self-register and doctors to be registered/approved by an administrator.
+The system shall authenticate users and redirect them to a dashboard appropriate to their role (patient, doctor, admin).
+The system shall allow patients to book appointments only against a doctor's declared available time slots, preventing double-booking.
+The system shall allow doctors to approve, reject, or reschedule appointment requests.
+The system shall provide a chat interface tied to an approved appointment for consultation.
+The system shall allow doctors to record diagnoses, treatment notes, and lab result attachments to a patient's EMR.
+The system shall allow doctors to generate prescriptions that patients can view and download as PDF documents.
+The system shall notify users in-app of relevant events (appointment status changes, new messages, prescription availability).
+The system shall provide role-scoped search across patients, doctors, and appointments.
+The system shall provide administrators with aggregate statistics and CSV-exportable reports.
+The system shall accept vital sign readings from a BLE-compatible device or a simulator, store them, and flag out-of-range readings.
+The system shall allow patients to submit a symptom checklist and receive a ranked list of possible conditions with confidence scores, clearly labelled as decision support only.
+
+Non-Functional Requirements
+Security: All forms shall be protected against CSRF; passwords shall be hashed; access to every view shall be restricted according to user role.
+Usability: The interface shall be responsive and usable on both desktop and mobile viewports using Bootstrap 5.
+Reliability: Server-side validation shall be enforced on all inputs regardless of client-side validation.
+Maintainability: The system shall be organised into discrete Django apps per functional module to support independent extension.
+Performance: Search and report queries shall be paginated to maintain responsiveness as data volume grows.
+Use Case Analysis
+Three primary actors interact with the system: the Patient, the Doctor, and the Administrator. Key use cases for each actor are summarised below.
+Table 3.1: Actors and associated use cases
+ Detailed Use Case Descriptions
+Three representative use cases are described in detail below to illustrate the interaction between actors and the system at a level not captured by Table 3.1.
+Use Case: Book Appointment. Actor: Patient. Precondition: The patient is authenticated and the target doctor has published at least one available time slot. Main flow: the patient searches for or selects a doctor, views the doctor's published weekly availability, selects an open slot, and submits a booking request; the system validates the request against existing confirmed appointments for that doctor and slot, and, if no conflict exists, creates the appointment with a status of pending and notifies the doctor. Alternate flow: if the selected slot has since been booked by another patient, the system rejects the request at validation time and prompts the patient to select a different slot, preventing double-booking. Postcondition: a pending appointment record exists and is visible to both patient and doctor pending the doctor's decision.
+Use Case: Submit Symptom Checklist for AI Suggestion. Actor: Patient. Precondition: The patient is authenticated. Main flow: the patient selects symptoms from a structured checklist and submits the form; the system passes the selected symptoms to the trained classifier via the diagnosis service layer, which returns a ranked list of candidate conditions with confidence scores; the system persists the suggestion against the patient's record and displays it alongside a disclaimer that the output is decision-support only. Alternate flow: if fewer than the minimum required number of symptoms is selected, the system returns a validation error prompting the patient to select additional symptoms before submission. Postcondition: a DiagnosisSuggestion record is created and made visible to the patient and their treating doctor.
+Use Case: Pair or Simulate BLE Blood Pressure Device. Actor: Patient. Precondition: The patient is authenticated and using a browser that supports the Web Bluetooth API, or has selected simulator mode. Main flow: the patient initiates device pairing; if a compatible BLE blood pressure monitor is available, the browser's native device chooser is invoked and, once paired, the system subscribes to the standard Blood Pressure Measurement characteristic and streams incoming readings to the ingestion endpoint. Alternate flow: if no physical device is available or the browser lacks Web Bluetooth support, the patient instead activates simulator mode, which generates realistic sample readings through the same ingestion endpoint. Postcondition: one or more DeviceReading records are created and displayed on the patient's vitals timeline, with any out-of-range reading flagged to the treating doctor.
+System Architecture
+TeleMed follows a modular monolithic architecture built on Django's Model-View-Template (MVT) pattern. 
+The system is organised into independent Django applications authentication, patients, doctors, appointments, consultations, medical records, prescriptions, notifications, reports, dashboard, and devices  each encapsulating its own models, views, and templates, while sharing a single MySQL database and a common custom user model with a role field. The Devices module additionally contains a service layer (devices/services/diagnosis.py) that loads a pre-trained scikit-learn model, decoupling machine learning inference from the request/response cycle and from the model training process, which occurs offline via a separate script (ml/train_model.py).
+
+The frontend layer consists of server-rendered HTML5 templates styled with Bootstrap 5, augmented with JavaScript for dynamic behaviour such as AJAX-based chat polling, notification dropdown handling, and Web Bluetooth device pairing. Chart.js, loaded via CDN, is used to render vital sign trends and administrative report charts from JSON data supplied by dedicated Django views.
+ High-Level Architecture Layers
+Presentation Layer: HTML5 templates, Bootstrap 5, JavaScript (chat polling, Web Bluetooth pairing, Chart.js visualisations).
+Application Layer: Django views, forms, and URL routing, organised per module; role-based access control enforced via mixins/decorators on every view.
+Service Layer: Dedicated service modules (e.g., devices/services/diagnosis.py) encapsulating business logic such as ML inference, kept separate from views.
+Data Layer: Django ORM models mapped to a MySQL relational database, accessed exclusively through parameterised ORM queries.
+Integration Layer: Web Bluetooth API (browser-native) for BLE device communication; WeasyPrint/xhtml2pdf for PDF generation.
+
+Database Design
+The database schema was designed around the core entities of the system: User (with role), PatientProfile, DoctorProfile, Availability, Appointment, Consultation, ChatMessage, MedicalRecord, LabResult, Prescription, Notification, DeviceReading, and DiagnosisSuggestion. Key relationships include a one-to-one relationship between User and the respective PatientProfile or DoctorProfile depending on role; a one-to-many relationship from Doctor to Appointment and from Patient to Appointment; a one-to-one relationship from an approved Appointment to its Consultation; and one-to-many relationships from Consultation to ChatMessage, MedicalRecord entries, and Prescription records. DeviceReading and DiagnosisSuggestion are each linked many-to-one to PatientProfile.
+A full entity-relationship diagram, generated using django-extensions' graph_models utility (or hand-drawn equivalent), should be inserted here as Figure 3.1, showing all fields, primary keys, foreign keys, and cardinalities.
+
+
+
+Figure 3.1: Entity-Relationship Diagram
+
+ Data Dictionary
+Table 3.2 presents the data dictionary describing the principal fields of each entity in the schema, complementing the entity-relationship diagram above with field-level detail relevant to the implementation discussed in Chapter Four.
+Table 3.2: Data dictionary of principal entities and fields
+
+ Input and Output Design
+Input into the system is primarily collected through Django ModelForms, which enforce server-side validation for all user-submitted data, including registration details, profile information, appointment requests, consultation messages, EMR entries, and symptom checklists. File uploads (lab results, profile photographs) are validated for file type and size before being persisted.
+Output is presented through role-specific dashboards summarising relevant information (e.g., a patient's upcoming appointments and active prescriptions; a doctor's today's appointments and pending requests; an administrator's aggregate statistics), downloadable PDF prescriptions formatted with clinic letterhead-style headers, and CSV-exportable reports for administrative use.
+
+ System Flowchart
+
+
+
+
+
+
+
+
+
+CHAPTER FOUR
+IMPLEMENTATION, TESTING AND RESULT
+Development Environment and Tools
+Table 4.1: Development tools and technologies used
+
+ Project Structure
+The system was implemented as a single Django project (telemed project) containing one application per functional module, in line with the design presented in Chapter Three: authentication, patients, doctors, appointments, consultations, medical_records, prescriptions, notifications, reports, dashboard, and devices. This modular structure allows each functional area to be developed, tested, and explained independently while sharing a common custom user model and database.
+
+
+
+Module Implementation
+Authentication Module
+A custom user model extending Django's AbstractUser was implemented with an additional role field restricted to patient, doctor, or admin. Patients may self-register through a public registration form; doctor accounts are created and approved exclusively by an administrator, preventing unauthorised self-registration as a medical professional. Login and logout views redirect users to the dashboard corresponding to their role, and Django's built-in password reset flow was configured with a console email backend for development. Role-based access control was enforced on every view using permission mixins, ensuring that, for example, a patient account cannot access doctor- or admin-only views by directly navigating to their URLs.
+
+Patient and Doctor Modules
+The patient module allows a patient to maintain a profile comprising full name, date of birth, gender, contact information, address, blood group, allergies, and emergency contact details, along with a free-text and structured medical history section linked to the medical_records app. Patients may edit their own profile information but cannot directly edit clinical medical record entries, which remain the responsibility of the treating doctor.
+The doctor module allows each doctor to maintain a profile including specialisation, biography, qualifications, optional consultation fee, and profile photograph, and to define a weekly availability schedule of day and time slots. An availability status toggle (available, busy, or offline) is displayed to patients during the booking process.
+
+Appointment Module
+The appointment module validates each booking request against the target doctor's declared availability schedule and existing confirmed appointments, preventing double-booking of a single time slot. Appointments progress through a defined status lifecycle pending, approved, rejected, cancelled, and completed with doctors able to approve or reject pending requests. Both patients and doctors can view a filterable appointment history by status and date.
+
+Consultation Module
+Consultation is tied strictly to an approved appointment. A chat-based communication interface was implemented, with messages timestamped and persisted against the consultation record to preserve a complete communication history. Doctors are able to attach consultation notes directly to the session, which are written into the patient's electronic medical record. A disabled “Start Video Call” control was included in the interface as a clearly marked extension point for future WebRTC-based video consultation, without implementing video functionality in the current version.
+
+Electronic Medical Records (EMR) and Prescription Modules
+The EMR module allows doctors to record diagnosis entries and treatment records linked to a specific patient and consultation, and to upload lab results (PDF or image) with associated metadata such as test name, date, and doctor's comment. Access to EMR entries is restricted such that only doctors may create or edit records, patients have read-only access to their own records, and administrators retain oversight access. The prescription module allows a doctor to create a prescription linked to a consultation, specifying medication, dosage, instructions, and duration; patients can view their prescription history and download a formatted PDF version generated using WeasyPrint, styled with a clinic letterhead layout.
+
+Notification, Search, and Reports Modules
+An in-app notification centre was implemented using Django's post_save signals to trigger notifications on relevant model events, such as appointment status changes, new consultation messages, and prescription creation, with mark-as-read functionality. A global, role-scoped search feature was implemented using Django ORM Q objects to allow multi-field searching across patients, doctors, and appointments, with paginated results. The reports module aggregates statistics such as total patients, total doctors, total appointments, and consultation counts, presented through Chart.js visualisations fed by JSON data from dedicated report views, with CSV export functionality.
+
+Dashboards
+Three role-specific dashboards were implemented. The administrator dashboard provides CRUD access to patients, doctors, appointments, and consultations, along with user account activation/deactivation, doctor account approval, and access to system-wide reports; Django's built-in admin site is retained for heavy data management alongside the custom Bootstrap-styled dashboard for routine actions. The doctor dashboard surfaces the day's appointments, pending consultation requests, quick access to relevant patient records, and a prescription-management shortcut. The patient dashboard displays upcoming appointments, consultation history, a medical records summary, active prescriptions, and unread notifications.
+ Devices Module: IoT Vital Sign Monitoring
+Real-time blood pressure monitoring was implemented using the browser-native Web Bluetooth API (navigator.bluetooth), targeting devices that implement the standard Bluetooth SIG Blood Pressure Profile (service UUID 0x1810, characteristic 0x2A35). Building against this standard profile, rather than a proprietary vendor SDK, allows the feature to generalise across any compliant consumer BLE blood pressure monitor. Because a physical BLE device may not always be available for demonstration, a device simulator mode was also implemented, allowing a virtual device to be “paired” and stream realistic sample readings. Both real and simulated readings are submitted to a single backend ingestion endpoint (POST /devices/readings/), ensuring the simulator functions purely as an alternate data source rather than a separate code path. Stored readings (systolic, diastolic, pulse, timestamp, device ID) are displayed on the patient dashboard and to the treating doctor with a Chart.js trend visualisation, and readings outside a defined normal range (systolic greater than 140 or less than 90) are automatically flagged and surfaced as a notification to the doctor.
+
+Devices Module: AI-Assisted Symptom Analysis
+A symptom-to-condition classifier was trained using scikit-learn on a publicly available symptom-disease dataset, using a Random Forest classifier selected for its balance of predictive accuracy and interpretability, both of which are useful during a project defense. The model was trained offline via a dedicated script (ml/train_model.py) and serialised using joblib, then loaded within a dedicated service layer (devices/services/diagnosis.py) rather than being trained or loaded within the request/response cycle, in order to keep inference fast and the training process auditable and reproducible.
+Patients interact with the feature by selecting symptoms from a structured checklist and submitting the form, after which the system returns a ranked list of likely conditions accompanied by confidence scores. The interface displays a persistent, clearly visible disclaimer stating that the output is for informational and decision-support purposes only and does not constitute a certified medical diagnosis. Suggestions are persisted to the patient's record and made visible to the treating doctor as supporting context, but are never used to autonomously generate a diagnosis or bypass the doctor's own clinical judgement.
+
+ API and Endpoint Summary
+Table 4.1 summarises the principal application endpoints exposed by the system, indicating the HTTP method, purpose, and the role(s) permitted to access each, consistent with the role-based access control described in Section 4.4.
+Table 4.1: Summary of principal application endpoints
+Security Implementation
+CSRF protection enabled on all forms via Django's default middleware.
+Passwords hashed using Django's default password hashing framework; no plaintext storage.
+Role-based access control enforced on every view using permission mixins/decorators.
+File upload validation (type and size limits) applied to lab result and profile photo uploads.
+All database queries executed through the Django ORM, eliminating raw SQL string concatenation and associated injection risk.
+Sensitive configuration values (database credentials, secret key, API keys) stored in a .env file, excluded from version control via .gitignore, and loaded via django-environ/python-decouple rather than hardcoded.
+Seed Data
+A custom Django management command (python manage.py seed_demo_data) was implemented to populate the database with sample doctors, patients, appointments, and blood pressure readings, ensuring the system is immediately demonstrable after a fresh setup without requiring manual data entry.
+Testing
+ Testing Strategy
+The system was tested using a combination of automated unit testing (via Django's TestCase framework) and manual functional testing across each module. Automated tests focused on three critical areas identified as having the highest risk of silent failure: authentication and role-based access control, appointment booking conflict logic, and the AI diagnosis service layer. Manual functional testing was conducted across all remaining modules by exercising each user flow (registration, booking, chat, EMR entry, prescription generation, notifications, search, reporting, device pairing/simulation, and symptom submission) and verifying expected outcomes against the requirements defined in Chapter Three.
+
+
+
+
+
+
+
+Sample Test Cases and Results
+Table 4.2: Sample test cases and results
+Model Evaluation (AI Diagnosis)
+The trained symptom-to-condition classifier was evaluated on a held-out test split of the training dataset, with accuracy and a confusion matrix computed to assess performance across condition classes. [Insert accuracy score, confusion matrix image, and any relevant precision/recall figures generated by the model evaluation step here, as produced during training.]
+
+
+
+[Insert screenshot here: Confusion Matrix / Model Evaluation Report]
+
+
+
+Figure 4.1: Confusion Matrix / Model Evaluation Report
+Summary
+This chapter described the implementation of each module of the TeleMed system in line with the design presented in Chapter Three, the security measures applied throughout, and the testing strategy and results used to validate system behaviour. The final chapter presents a summary, conclusion, and recommendations arising from the project.
+
+
+CHAPTER FIVE
+ SUMMARY, CONCLUSION AND RECOMMENDATIONS
+Summary
+This project set out to design and implement TeleMed, a web-based telemedicine platform capable of supporting remote patient–doctor interaction from registration through consultation, diagnosis support, and prescription, using PTI Clinic as a case study for the manual workflow it replaces. The system was built using Django, MySQL, and Bootstrap 5, organised into eleven functional modules covering authentication, patient and doctor profiles, appointment scheduling, chat-based consultation, electronic medical records, prescriptions, notifications, search, reporting, and administrative dashboards. In addition to replicating the core capabilities of commercial platforms such as Teladoc, Amwell, and MDLIVE, the system extended these capabilities with a Devices module supporting real-time IoT vital sign monitoring via the Web Bluetooth API and a machine learning-based symptom analysis tool offering non-diagnostic, decision-support suggestions.
+The completed system was evaluated through a combination of automated unit testing and manual functional testing, covering authentication and access control, appointment conflict logic, and the AI diagnosis service layer, with all sampled test cases passing as documented in Chapter Four.
+
+
+
+
+Conclusion
+The project demonstrates that a functionally complete, secure, and extensible telemedicine platform can be designed and implemented using open-source tools within an academic setting, achieving feature parity in core areas with established commercial systems while introducing IoT device integration and machine learning-assisted decision support as meaningful extensions. The modular architecture adopted, in which each functional area is implemented as an independent Django application sharing a common role-based user model, proved effective both for incremental development and for producing a codebase that can be clearly explained and defended module by module.
+Contribution to Knowledge
+A working demonstration of integrating standard-profile BLE medical devices into a conventional Django web application via the Web Bluetooth API, including a simulator-based fallback architecture that shares a single ingestion endpoint with real hardware.
+A reproducible example of training and deploying a scikit-learn-based symptom-to-condition classifier as a decision-support service layer within a Django application, separated from the request/response cycle.
+A comparative analysis of commercial telemedicine platform features against a reproducible, academically accessible implementation, useful as a reference point for future student projects in this domain.
+5.4 Recommendations
+The system should be deployed to a production-grade hosting environment (rather than local XAMPP/MySQL) with proper environment separation (development, staging, production) before any real-world pilot use.
+The AI diagnosis model should be retrained and validated on a larger, clinically reviewed dataset, ideally with input from a licensed medical professional, before any consideration of use beyond an academic demonstration.
+A formal security audit and penetration test should be conducted prior to handling real patient data, given the sensitivity of medical information.
+User acceptance testing with real patients and doctors should be conducted to refine usability based on real-world feedback.
+5.5 Suggestions for Future Work
+The most significant enhancement identified for future work is the implementation of real-time video consultation using WebRTC, for which an extension point (a disabled “Start Video Call” control) was deliberately left in the consultation module during this phase of development. Other suggested extensions include email and SMS notification channels, integration with additional categories of BLE health devices (e.g., pulse oximeters, glucometers), multi-language support, and a native mobile application to complement the responsive web interface.
+
+
+REFERENCES
+Django Software Foundation. (n.d.). Django documentation. Retrieved from https://docs.djangoproject.com/
+Bluetooth SIG. (n.d.). Blood Pressure Service specification. Retrieved from https://www.bluetooth.com/specifications/specs/
+Mozilla Developer Network. (n.d.). Web Bluetooth API. Retrieved from https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API
+
+Jat, A. S., Grønli, T.-M., & Ghinea, G. (2024). Technological utilization in remote healthcare: Factors influencing healthcare professionals' adoption and use. Journal of Health Informatics in Developing Countries, 18(1).
+
+Pedregosa, F., et al. (2011). Scikit-learn: Machine Learning in Python. Journal of Machine Learning Research, 12, 2825–2830.
+
+Teladoc Health, Inc. (n.d.). About Teladoc Health. Retrieved from https://www.teladochealth.com/
+
+World Health Organization. (2010). Telemedicine: Opportunities and developments in Member States. WHO Global Observatory for eHealth.
+OWASP Foundation. (n.d.). OWASP Top Ten. Retrieved from https://owasp.org/www-project-top-ten/
+
+Bootstrap Team. (n.d.). Bootstrap documentation. Retrieved from https://getbootstrap.com/docs/
+
+WeasyPrint. (n.d.). WeasyPrint documentation. Retrieved from https://weasyprint.org/
+Chart.js. (n.d.). Chart.js documentation. Retrieved from https://www.chartjs.org/docs/
+
+Practo. (n.d.). About Practo. Retrieved from https://www.practo.com/
+
+APPENDICES
+Appendix A: Sample Source Code
+Appendix A retains the placeholder instruction above for inserting the project's actual source files; the pseudocode listings below illustrate the core logic of two representative modules discussed in Chapter Four and may be replaced with the corresponding real source excerpts.
+A.1 Appointment Conflict-Checking Logic (appointments/services.py)
+def is_slot_available(doctor, date, time_slot):
+    conflicting = Appointment.objects.filter(
+        doctor=doctor, date=date, time_slot=time_slot,
+        status__in=['pending', 'approved']
+    )
+    return not conflicting.exists()
+ 
+def book_appointment(patient, doctor, date, time_slot):
+    if not is_slot_available(doctor, date, time_slot):
+        raise SlotUnavailableError(
+            'This time slot is no longer available.'
+        )
+    return Appointment.objects.create(
+        patient=patient, doctor=doctor,
+        date=date, time_slot=time_slot,
+        status='pending'
+    )
+Listing A.1: Simplified conflict-checking logic preventing double-booking of a doctor's time slot
+A.2 AI Diagnosis Service Layer (devices/services/diagnosis.py)
+class DiagnosisService:
+    def __init__(self, model_path='ml/models/classifier.joblib'):
+        self.model = joblib.load(model_path)
+ 
+    def predict(self, selected_symptoms):
+        feature_vector = encode_symptoms(selected_symptoms)
+        probabilities = self.model.predict_proba([feature_vector])[0]
+        ranked = sorted(
+            zip(self.model.classes_, probabilities),
+            key=lambda pair: pair[1], reverse=True
+        )
+        return [
+            {'condition': cond, 'confidence': round(float(p), 2)}
+            for cond, p in ranked[:5]
+        ]
+Listing A.2: Simplified diagnosis service layer wrapping the trained scikit-learn classifier
+Appendix B: Sample Screenshots
+The screenshots below illustrate the completed system across each major role and module. Each placeholder should be replaced with an actual screenshot at a consistent resolution (1366×768 or similar), captured from the running application.
+
+
+[Insert screenshot here: Landing Page]
+
+
+Figure B.1: Landing Page
+
+
+[Insert screenshot here: Registration / Login Screens]
+
+
+Figure B.2: Registration / Login Screens
+
+
+[Insert screenshot here: Patient Dashboard]
+
+
+Figure B.3: Patient Dashboard
+
+
+[Insert screenshot here: Doctor Dashboard]
+
+
+Figure B.4: Doctor Dashboard
+
+
+[Insert screenshot here: Admin Dashboard]
+
+
+Figure B.5: Admin Dashboard
+
+
+[Insert screenshot here: Appointment Booking Flow]
+
+
+Figure B.6: Appointment Booking Flow
+
+
+[Insert screenshot here: Chat Consultation Interface]
+
+
+Figure B.7: Chat Consultation Interface
+
+
+[Insert screenshot here: EMR Entry Screen]
+
+
+Figure B.8: EMR Entry Screen
+
+
+[Insert screenshot here: Prescription PDF Output]
+
+
+Figure B.9: Prescription PDF Output
+
+
+[Insert screenshot here: Device Pairing / Simulator Screen]
+
+
+Figure B.10: Device Pairing / Simulator Screen
+
+
+[Insert screenshot here: AI Symptom-Checker Results Screen]
+
+
+Figure B.11: AI Symptom-Checker Results Screen
+Appendix C: Database Schema / ER Diagram
+[Insert the full entity-relationship diagram referenced in Chapter Three, Section 3.6.]
+
+Appendix D: Model Evaluation Report
+[Insert the full accuracy report and confusion matrix generated from ml/train_model.py, referenced in Chapter Four, Section 4.7.]

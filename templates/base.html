@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Telemedicine Portal{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-width: 260px;
+            --sidebar-bg: #1a1a2e;
+            --sidebar-hover: #16213e;
+            --sidebar-active: #0f3460;
+            --accent-color: #4cc9f0;
+            --primary-color: #4361ee;
+            --primary-hover: #3751d4;
+            --dark-color: #1e1e2f;
+            --card-border-radius: 12px;
+            --transition-speed: 0.3s;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+            min-height: 100vh;
+        }
+
+        /* ===== Sidebar ===== */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--sidebar-bg);
+            color: #fff;
+            z-index: 1040;
+            display: flex;
+            flex-direction: column;
+            transition: transform var(--transition-speed) ease;
+        }
+
+        .sidebar-brand {
+            padding: 1.25rem 1.25rem 0.75rem;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .sidebar-brand a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.15rem;
+            letter-spacing: -0.5px;
+        }
+
+        .sidebar-brand a i { color: var(--accent-color); }
+
+        /* Search inside sidebar */
+        .sidebar-search {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .sidebar-search .input-group {
+            background: rgba(255,255,255,0.08);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .sidebar-search .input-group input {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 0.8rem;
+            padding: 0.4rem 0.75rem;
+        }
+
+        .sidebar-search .input-group input::placeholder { color: rgba(255,255,255,0.4); }
+        .sidebar-search .input-group input:focus { outline: none; box-shadow: none; }
+        .sidebar-search .input-group button {
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.5);
+            padding: 0.4rem 0.75rem;
+            cursor: pointer;
+        }
+
+        /* Nav section title */
+        .sidebar-section-title {
+            padding: 1rem 1.25rem 0.35rem;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: rgba(255,255,255,0.3);
+            font-weight: 600;
+        }
+
+        /* Nav links */
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 0.5rem 1rem;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.1) transparent;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+
+        .sidebar-nav .nav-item { list-style: none; }
+
+        .sidebar-nav .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 0.9rem;
+            margin: 2px 0;
+            color: rgba(255,255,255,0.65);
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            transition: all var(--transition-speed);
+        }
+
+        .sidebar-nav .nav-link i {
+            width: 20px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .sidebar-nav .nav-link:hover {
+            background: var(--sidebar-hover);
+            color: #fff;
+        }
+
+        .sidebar-nav .nav-link.active {
+            background: var(--sidebar-active);
+            color: var(--accent-color);
+        }
+
+        .sidebar-nav .nav-link .badge {
+            margin-left: auto;
+            font-size: 0.65rem;
+        }
+
+        /* Sidebar footer — user profile */
+        .sidebar-footer {
+            padding: 0.85rem 1rem;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .sidebar-footer .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .sidebar-footer .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            color: var(--sidebar-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .sidebar-footer .user-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .sidebar-footer .user-name {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-footer .user-role {
+            font-size: 0.68rem;
+            color: rgba(255,255,255,0.4);
+            text-transform: capitalize;
+        }
+
+        .sidebar-footer .logout-link {
+            color: rgba(255,255,255,0.4);
+            font-size: 1.1rem;
+            transition: color var(--transition-speed);
+        }
+
+        .sidebar-footer .logout-link:hover { color: #f72585; }
+
+        /* ===== Top bar (mobile only) ===== */
+        .topbar {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background: var(--sidebar-bg);
+            z-index: 1035;
+            padding: 0 1rem;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .topbar-brand {
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.05rem;
+            text-decoration: none;
+        }
+
+        .topbar-brand i { color: var(--accent-color); }
+
+        .topbar-hamburger {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        /* ===== Main content ===== */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: margin-left var(--transition-speed) ease;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            padding: 1.5rem 2rem;
+        }
+
+        .footer {
+            background-color: var(--dark-color);
+            color: rgba(255,255,255,0.6);
+            padding: 1.25rem 2rem;
+            font-size: 0.82rem;
+            text-align: center;
+        }
+
+        /* ===== Cards / shared ===== */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all var(--transition-speed);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .card {
+            border: none;
+            border-radius: var(--card-border-radius);
+            box-shadow: 0 8px 24px rgba(149, 157, 165, 0.1);
+            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+            margin-bottom: 1.5rem;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(149, 157, 165, 0.15);
+        }
+
+        .card-header {
+            background-color: transparent;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            font-weight: 600;
+            padding: 1.25rem;
+        }
+
+        .hover-lift {
+            transition: transform var(--transition-speed) ease;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-2px);
+        }
+
+        .alert-fixed {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .notification-badge-sidebar {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            border-radius: 10px;
+            background: #f72585;
+            color: #fff;
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 0 6px;
+            margin-left: auto;
+        }
+
+        /* ===== Watermark ===== */
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 0;
+            width: 500px;
+            height: 500px;
+            object-fit: contain;
+        }
+
+        /* Sidebar backdrop */
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1039;
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 767.98px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-backdrop.show {
+                display: block;
+            }
+
+            .topbar {
+                display: flex;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding-top: 56px;
+            }
+
+            .content-wrapper {
+                padding: 1rem;
+            }
+
+            .footer {
+                padding: 1rem;
+            }
+        }
+
+        @media (min-width: 768px) and (max-width: 991.98px) {
+            .sidebar { width: 220px; }
+            .main-content { margin-left: 220px; }
+            .content-wrapper { padding: 1.25rem; }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- ===== Sidebar Backdrop ===== -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- ===== Mobile Top Bar ===== -->
+    <div class="topbar">
+        <button class="topbar-hamburger" id="sidebarToggle" aria-label="Toggle navigation">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <a class="topbar-brand" href="{% url 'dashboard_home' %}" class="d-flex align-items-center gap-2">
+            <img src="{{ SITE_LOGO }}" alt="{{ SITE_NAME }} Logo" style="height:24px; width:24px; border-radius:50%; object-fit:cover;">
+            <span>{{ SITE_NAME }}</span>
+        </a>
+        <div style="width: 24px;"></div> {% comment %}spacer{% endcomment %}
+    </div>
+
+    <!-- ===== Sidebar ===== -->
+    <aside class="sidebar" id="sidebar">
+        <!-- Brand -->
+        <div class="sidebar-brand">
+            <a href="{% url 'dashboard_home' %}" class="d-flex align-items-center gap-2">
+                <img src="{{ SITE_LOGO }}" alt="{{ SITE_NAME }} Logo" style="height:32px; width:32px; border-radius:50%; object-fit:cover;">
+                <span>{{ SITE_NAME }}</span>
+            </a>
+        </div>
+
+        {% if user.is_authenticated %}
+        <!-- Search -->
+        <div class="sidebar-search">
+            <form action="{% url 'global_search' %}" method="GET">
+                <div class="input-group">
+                    <input type="search" name="q" placeholder="Global search..." aria-label="Search" required>
+                    <button type="submit"><i class="fa-solid fa-search"></i></button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+
+        <!-- Nav links -->
+        <ul class="sidebar-nav">
+            {% if user.is_authenticated %}
+                <li class="sidebar-section-title">Main</li>
+                <li class="nav-item">
+                    <a class="nav-link{% if request.resolver_match.url_name == 'dashboard_home' or request.resolver_match.url_name == 'dashboard_patient' or request.resolver_match.url_name == 'dashboard_doctor' or request.resolver_match.url_name == 'dashboard_admin' %} active{% endif %}" href="{% url 'dashboard_home' %}">
+                        <i class="fa-solid fa-chart-line"></i>Dashboard
+                    </a>
+                </li>
+
+                {% if user.role == 'patient' %}
+                    <li class="sidebar-section-title">Appointments</li>
+                    <li class="nav-item">
+                        <a class="nav-link{% if request.resolver_match.url_name == 'book_appointment' %} active{% endif %}" href="{% url 'book_appointment' %}">
+                            <i class="fa-solid fa-calendar-plus"></i>Book Appointment
+                        </a>
+                    </li>
+
+                    <li class="sidebar-section-title">Health</li>
+                    <li class="nav-item">
+                        <a class="nav-link{% if request.resolver_match.url_name == 'ai_diagnosis' %} active{% endif %}" href="{% url 'ai_diagnosis' %}">
+                            <i class="fa-solid fa-brain"></i>AI Symptom Check
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link{% if request.resolver_match.url_name == 'view_readings' %} active{% endif %}" href="{% url 'view_readings' %}">
+                            <i class="fa-solid fa-heart-pulse"></i>Health Devices
+                        </a>
+                    </li>
+
+                    <li class="sidebar-section-title">Records</li>
+                    <li class="nav-item">
+                        <a class="nav-link{% if request.resolver_match.url_name == 'prescription_list' %} active{% endif %}" href="{% url 'prescription_list' %}">
+                            <i class="fa-solid fa-prescription-bottle-medical"></i>My Prescriptions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link{% if request.resolver_match.url_name == 'view_my_records' %} active{% endif %}" href="{% url 'view_my_records' %}">
+                            <i class="fa-solid fa-file-medical"></i>My EMR
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% if user.role == 'doctor' %}
+                    <li class="sidebar-section-title">Schedule</li>
+                    <li class="nav-item">
+                        <a class="nav-link{% if request.resolver_match.url_name == 'manage_availability' %} active{% endif %}" href="{% url 'manage_availability' %}">
+                            <i class="fa-solid fa-clock"></i>Availability Schedule
+                        </a>
+                    </li>
+
+                    <li class="sidebar-section-title">Clinical</li>
+                    <li class="nav-item">
+                        <a class="nav-link{% if request.resolver_match.url_name == 'create_prescription' %} active{% endif %}" href="{% url 'create_prescription' %}">
+                            <i class="fa-solid fa-file-prescription"></i>Write Prescription
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link{% if request.resolver_match.url_name == 'add_medical_record' %} active{% endif %}" href="{% url 'add_medical_record' %}">
+                            <i class="fa-solid fa-file-invoice-dollar"></i>Create EMR
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% if user.role == 'admin' or user.is_superuser %}
+                    <li class="sidebar-section-title">Admin</li>
+                    <li class="nav-item">
+                        <a class="nav-link{% if request.resolver_match.url_name == 'reports_home' %} active{% endif %}" href="{% url 'reports_home' %}">
+                            <i class="fa-solid fa-chart-pie"></i>Aggregated Reports
+                        </a>
+                    </li>
+                {% endif %}
+
+                <!-- Divider & Notification -->
+                <li class="sidebar-section-title">General</li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" id="sidebarNotifToggle">
+                        <i class="fa-regular fa-bell"></i>Notifications
+                        {% if unread_notifications_count > 0 %}
+                            <span class="notification-badge-sidebar">{{ unread_notifications_count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+
+                <!-- Profile link for patient/doctor -->
+                {% if user.role == 'patient' %}
+                    <li class="nav-item">
+                        <a class="nav-link{% if request.resolver_match.url_name == 'edit_patient_profile' %} active{% endif %}" href="{% url 'edit_patient_profile' %}">
+                            <i class="fa-solid fa-user-edit"></i>Edit Profile
+                        </a>
+                    </li>
+                {% elif user.role == 'doctor' %}
+                    <li class="nav-item">
+                        <a class="nav-link{% if request.resolver_match.url_name == 'edit_doctor_profile' %} active{% endif %}" href="{% url 'edit_doctor_profile' %}">
+                            <i class="fa-solid fa-user-md"></i>Edit Profile
+                        </a>
+                    </li>
+                {% endif %}
+            {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'login' %}"><i class="fa-solid fa-sign-in-alt"></i>Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'register_patient' %}"><i class="fa-solid fa-user-plus"></i>Register</a>
+                </li>
+            {% endif %}
+        </ul>
+
+        {% if user.is_authenticated %}
+        <!-- Footer — user profile -->
+        <div class="sidebar-footer">
+            <div class="user-info">
+                {% if user.role == 'patient' %}
+                    {% with initial=user.get_full_name|first|default:user.username|first %}
+                    <div class="user-avatar">{{ initial|upper }}</div>
+                    {% endwith %}
+                {% elif user.role == 'doctor' %}
+                    {% with initial=user.get_full_name|first|default:user.username|first %}
+                    <div class="user-avatar">{{ initial|upper }}</div>
+                    {% endwith %}
+                {% else %}
+                    <div class="user-avatar"><i class="fa-solid fa-user" style="font-size:0.9rem;"></i></div>
+                {% endif %}
+                <div class="user-details">
+                    <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
+                    <div class="user-role">{{ user.role }}</div>
+                </div>
+                <a href="{% url 'logout' %}" class="logout-link" title="Logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </aside>
+
+    <!-- ===== Main Content Area ===== -->
+    <div class="main-content" id="mainContent">
+
+        <!-- Watermark -->
+        <img src="{{ SITE_LOGO }}" alt="" class="watermark" aria-hidden="true">
+
+        <!-- Global messages -->
+        {% if messages %}
+            <div class="toast-container alert-fixed">
+                {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'info' %}primary{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="content-wrapper">
+            {% block content %}{% endblock %}
+        </div>
+
+        <footer class="footer">
+            <p class="mb-0">&copy; 2026 {{ SITE_NAME }} &mdash; Academic Final Year Project</p>
+            <small class="text-white-50">{{ SITE_TAGLINE }} &mdash; RBAC Telemedicine with AI Symptom Classifier &amp; BLE Devices</small>
+        </footer>
+    </div>
+
+    <!-- Notifications dropdown panel (hidden by default, shown on click) -->
+    <div id="notifPanel" class="card shadow" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:380px; max-height:500px; overflow-y:auto; z-index:9999;">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span class="fw-semibold"><i class="fa-regular fa-bell me-2"></i>Notifications</span>
+            <button type="button" class="btn-close" id="notifClose"></button>
+        </div>
+        <div class="card-body p-0">
+            {% if recent_notifications %}
+                <ul class="list-group list-group-flush">
+                    {% for notif in recent_notifications %}
+                        <li class="list-group-item px-3 py-2 {% if not notif.is_read %}bg-light{% endif %}">
+                            <a href="{% url 'mark_notification_as_read' notif.id %}?next={{ request.path }}" class="text-decoration-none text-dark">
+                                <div class="fw-semibold small">{{ notif.title }}</div>
+                                <div class="text-muted small">{{ notif.message }}</div>
+                                <div class="text-muted text-end" style="font-size:0.65rem;">{{ notif.created_at|timesince }} ago</div>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <div class="text-center p-2 border-top">
+                    <a href="{% url 'mark_all_notifications_as_read' %}?next={{ request.path }}" class="text-decoration-none small text-primary">Mark all as read</a>
+                </div>
+            {% else %}
+                <div class="p-4 text-center text-muted small">No new notifications.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Sidebar toggle for mobile
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.getElementById('sidebarBackdrop');
+        const toggleBtn = document.getElementById('sidebarToggle');
+
+        function openSidebar() {
+            sidebar.classList.add('open');
+            backdrop.classList.add('show');
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            backdrop.classList.remove('show');
+        }
+
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (sidebar.classList.contains('open')) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
+            });
+        }
+
+        if (backdrop) {
+            backdrop.addEventListener('click', closeSidebar);
+        }
+
+        // Notification panel
+        const notifToggle = document.getElementById('sidebarNotifToggle');
+        const notifPanel = document.getElementById('notifPanel');
+        const notifClose = document.getElementById('notifClose');
+
+        if (notifToggle) {
+            notifToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                notifPanel.style.display = 'block';
+            });
+        }
+
+        if (notifClose) {
+            notifClose.addEventListener('click', function() {
+                notifPanel.style.display = 'none';
+            });
+        }
+
+        // Close notification panel when clicking outside
+        document.addEventListener('click', function(e) {
+            if (notifPanel && notifPanel.style.display === 'block') {
+                if (!notifPanel.contains(e.target) && e.target !== notifToggle && !notifToggle.contains(e.target)) {
+                    notifPanel.style.display = 'none';
+                }
+            }
+        });
+
+        // Auto-hide alerts after 5s
+        document.querySelectorAll('.alert-dismissible').forEach(function(el) {
+            setTimeout(function() { el.style.opacity = '0'; setTimeout(function() { el.remove(); }, 500); }, 5000);
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

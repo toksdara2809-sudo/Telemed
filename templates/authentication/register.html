@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center my-5">
+    <div class="col-md-8">
+        <div class="card p-4 border-0">
+            <div class="text-center mb-4">
+                <i class="fa-solid fa-user-plus fa-3x text-primary mb-3"></i>
+                <h3 class="fw-bold">Create Patient Account</h3>
+                <p class="text-muted">Join {{ SITE_NAME }} for quality virtual healthcare</p>
+            </div>
+
+            <form method="POST">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Account Info -->
+                <div class="card-header bg-light rounded-3 mb-3 mt-2">
+                    <i class="fa-solid fa-user-lock me-2 text-primary"></i><strong>Account Information</strong>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <label for="id_username" class="form-label">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-at"></i></span>
+                            {{ form.username }}
+                        </div>
+                        {% if form.username.errors %}
+                            <div class="text-danger small">{{ form.username.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_email" class="form-label">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
+                            {{ form.email }}
+                        </div>
+                        {% if form.email.errors %}
+                            <div class="text-danger small">{{ form.email.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <label for="id_password1" class="form-label">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-key"></i></span>
+                            {{ form.password1 }}
+                        </div>
+                        {% if form.password1.errors %}
+                            <div class="text-danger small">{{ form.password1.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_password2" class="form-label">Confirm Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-check-double"></i></span>
+                            {{ form.password2 }}
+                        </div>
+                        {% if form.password2.errors %}
+                            <div class="text-danger small">{{ form.password2.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Personal Info -->
+                <div class="card-header bg-light rounded-3 mb-3">
+                    <i class="fa-solid fa-id-card me-2 text-primary"></i><strong>Personal Information</strong>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <label for="id_first_name" class="form-label">First Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                            {{ form.first_name }}
+                        </div>
+                        {% if form.first_name.errors %}
+                            <div class="text-danger small">{{ form.first_name.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <label for="id_last_name" class="form-label">Last Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                            {{ form.last_name }}
+                        </div>
+                        {% if form.last_name.errors %}
+                            <div class="text-danger small">{{ form.last_name.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="id_date_of_birth" class="form-label">Date of Birth</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-calendar-days"></i></span>
+                            {{ form.date_of_birth }}
+                        </div>
+                        {% if form.date_of_birth.errors %}
+                            <div class="text-danger small">{{ form.date_of_birth.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <label for="id_gender" class="form-label">Gender</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-venus-mars"></i></span>
+                            {{ form.gender }}
+                        </div>
+                        {% if form.gender.errors %}
+                            <div class="text-danger small">{{ form.gender.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <label for="id_blood_group" class="form-label">Blood Group</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-droplet"></i></span>
+                            {{ form.blood_group }}
+                        </div>
+                        {% if form.blood_group.errors %}
+                            <div class="text-danger small">{{ form.blood_group.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="id_contact_number" class="form-label">Contact Number</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+                            {{ form.contact_number }}
+                        </div>
+                        {% if form.contact_number.errors %}
+                            <div class="text-danger small">{{ form.contact_number.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <label for="id_address" class="form-label">Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-location-dot"></i></span>
+                            {{ form.address }}
+                        </div>
+                        {% if form.address.errors %}
+                            <div class="text-danger small">{{ form.address.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_allergies" class="form-label">Allergies <span class="text-muted">(optional)</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-virus"></i></span>
+                            {{ form.allergies }}
+                        </div>
+                        {% if form.allergies.errors %}
+                            <div class="text-danger small">{{ form.allergies.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Emergency Contact -->
+                <div class="card-header bg-light rounded-3 mb-3">
+                    <i class="fa-solid fa-truck-medical me-2 text-danger"></i><strong>Emergency Contact</strong>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <label for="id_emergency_contact_name" class="form-label">Contact Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-user-shield"></i></span>
+                            {{ form.emergency_contact_name }}
+                        </div>
+                        {% if form.emergency_contact_name.errors %}
+                            <div class="text-danger small">{{ form.emergency_contact_name.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_emergency_contact_phone" class="form-label">Contact Phone</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-phone-volume"></i></span>
+                            {{ form.emergency_contact_phone }}
+                        </div>
+                        {% if form.emergency_contact_phone.errors %}
+                            <div class="text-danger small">{{ form.emergency_contact_phone.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fa-solid fa-user-plus me-2"></i>Create Account
+                    </button>
+                </div>
+            </form>
+
+            <div class="text-center mt-3 small">
+                <hr>
+                <span>Already have an account? <a href="{% url 'login' %}" class="text-primary fw-bold text-decoration-none">Sign In</a></span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

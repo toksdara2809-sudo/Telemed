@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Book Appointment - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-header d-flex align-items-center">
+                <i class="fa-solid fa-calendar-plus text-primary me-2"></i>
+                <h5 class="mb-0">Book an Appointment</h5>
+            </div>
+            <div class="card-body p-4">
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <i class="fa-solid fa-circle-exclamation me-2"></i>
+                        Please correct the errors below.
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <div class="small mt-1">{{ field.label }}: {{ error }}</div>
+                            {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                            <div class="small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="id_doctor" class="form-label fw-semibold">
+                            <i class="fa-solid fa-user-md me-1"></i>Doctor
+                        </label>
+                        <select name="doctor" id="id_doctor" class="form-select" required>
+                            <option value="">-- Select a Doctor --</option>
+                            {% for value, label in form.doctor.field.choices %}
+                                <option value="{{ value }}" {% if form.doctor.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_date" class="form-label fw-semibold">
+                            <i class="fa-regular fa-calendar me-1"></i>Date
+                        </label>
+                        <input type="date" name="date" id="id_date" class="form-control" value="{{ form.date.value|default:'' }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_time_slot" class="form-label fw-semibold">
+                            <i class="fa-regular fa-clock me-1"></i>Time
+                        </label>
+                        <input type="time" name="time_slot" id="id_time_slot" class="form-control" value="{{ form.time_slot.value|default:'' }}" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="id_reason" class="form-label fw-semibold">
+                            <i class="fa-solid fa-comment-medical me-1"></i>Reason for Visit
+                        </label>
+                        <textarea name="reason" id="id_reason" class="form-control" rows="4" placeholder="Describe your symptoms or reason for appointment...">{{ form.reason.value|default:'' }}</textarea>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fa-solid fa-calendar-check me-2"></i>Book Appointment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

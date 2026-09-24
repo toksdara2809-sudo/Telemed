@@ -1,0 +1,280 @@
+{% extends 'base.html' %}
+{% block title %}BLE Simulator{% endblock %}
+
+{% block extra_js %}
+<script>
+  function generateRandomReading() {
+    document.getElementById('id_systolic').value = Math.floor(Math.random() * (160 - 110 + 1)) + 110;
+    document.getElementById('id_diastolic').value = Math.floor(Math.random() * (100 - 70 + 1)) + 70;
+    document.getElementById('id_pulse').value = Math.floor(Math.random() * (100 - 60 + 1)) + 60;
+  }
+
+  /* ==================================================
+   * Web Bluetooth API — Real BLE Device Connection
+   * Targets the standard Bluetooth SIG Blood Pressure
+   * Profile (service 0x1810, characteristic 0x2A35).
+   * This works with most consumer BLE BP monitors
+   * (Omron, iHealth, etc.).
+   * ================================================== */
+  var bleDevice = null;
+  var bleServer = null;
+  var bleService = null;
+
+  function BleBloodPressureProfile() {
+    this.BP_SERVICE  = '00001810-0000-1000-8000-00805f9b34fb';
+    this.BP_MEASUREMENT = '00002a35-0000-1000-8000-00805f9b34fb';
+
+    this.connect = function () {
+      return navigator.bluetooth.requestDevice({
+        filters: [{ services: [this.BP_SERVICE] }],
+        optionalServices: [this.BP_SERVICE]
+      })
+      .then(function (device) {
+        bleDevice = device;
+        document.getElementById('bleStatus').textContent = 'Connected: ' + device.name;
+        document.getElementById('bleStatus').className = 'badge bg-success';
+        document.getElementById('bleConnectBtn').disabled = true;
+        document.getElementById('bleDisconnectBtn').disabled = false;
+        document.getElementById('bleReadBtn').disabled = false;
+        return device.gatt.connect();
+      })
+      .then(function (server) {
+        bleServer = server;
+        return server.getPrimaryService(BleBloodPressureProfile.prototype.BP_SERVICE);
+      })
+      .then(function (service) {
+        bleService = service;
+        return service.getCharacteristic(BleBloodPressureProfile.prototype.BP_MEASUREMENT);
+      })
+      .then(function (characteristic) {
+        return characteristic.readValue();
+      })
+      .then(function (value) {
+        parseAndSubmitBP(value);
+      })
+      .catch(function (error) {
+        document.getElementById('bleStatus').textContent = 'Error: ' + error.message;
+        document.getElementById('bleStatus').className = 'badge bg-danger';
+      });
+    };
+
+    this.disconnect = function () {
+      if (bleDevice && bleDevice.gatt) {
+        bleDevice.gatt.disconnect();
+      }
+      bleDevice = null;
+      bleServer = null;
+      bleService = null;
+      document.getElementById('bleStatus').textContent = 'Disconnected';
+      document.getElementById('bleStatus').className = 'badge bg-secondary';
+      document.getElementById('bleConnectBtn').disabled = false;
+      document.getElementById('bleDisconnectBtn').disabled = true;
+      document.getElementById('bleReadBtn').disabled = true;
+    };
+
+    this.readOnce = function () {
+      if (!bleService) return;
+      bleService.getCharacteristic(BleBloodPressureProfile.prototype.BP_MEASUREMENT)
+        .then(function (c) { return c.readValue(); })
+        .then(function (value) { parseAndSubmitBP(value); })
+        .catch(function (err) {
+          document.getElementById('bleStatus').textContent = 'Read error: ' + err.message;
+        });
+    };
+
+    function parseAndSubmitBP(dataView) {
+      // Blood Pressure Measurement characteristic (0x2A35) encoding:
+      // Byte 0: Flags (bit 0 = kPa/mmHg, bit 1 = timestamp present, bit 2 = pulse present)
+      // Byte 1-2: Systolic (uint16, little-endian)
+      // Byte 3-4: Diastolic (uint16, little-endian)
+      // Byte 5-6: Mean Arterial Pressure (uint16, little-endian)
+      // If pulse present (bit 2 of flags): next 2 bytes = pulse (uint16)
+      var flags = dataView.getUint8(0);
+      var systolic = dataView.getUint16(1, true);
+      var diastolic = dataView.getUint16(3, true);
+      var pulse = 0;
+      if (flags & 0x04) {
+        var pulseOffset = 7;
+        pulse = dataView.getUint16(pulseOffset, true);
+      }
+      var isKPa = !!(flags & 0x01);
+      if (isKPa) {
+        systolic = Math.round(systolic / 1.333);
+        diastolic = Math.round(diastolic / 1.333);
+      }
+      document.getElementById('id_systolic').value = systolic;
+      document.getElementById('id_diastolic').value = diastolic;
+      document.getElementById('id_pulse').value = pulse || Math.floor(Math.random() * (100 - 60 + 1)) + 60;
+      document.getElementById('bleStatus').textContent = 'Reading captured! Submitting...';
+      setTimeout(function () {
+        document.getElementById('simulateForm').dispatchEvent(new Event('submit'));
+      }, 300);
+    }
+  }
+
+  var bpProfile = new BleBloodPressureProfile();
+
+  function connectBLE() { bpProfile.connect(); }
+  function disconnectBLE() { bpProfile.disconnect(); }
+  function readBLE() { bpProfile.readOnce(); }
+
+  function getCSRFToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+  }
+
+  function showError(message) {
+    const card = document.getElementById('resultCard');
+    const body = document.getElementById('resultBody');
+    card.classList.remove('d-none');
+    card.classList.remove('card-returned');
+    body.innerHTML = `<div class="alert alert-danger mb-0">Error: ${message}</div>`;
+  }
+
+  function showSuccess(data) {
+    const card = document.getElementById('resultCard');
+    const body = document.getElementById('resultBody');
+    const r = data.reading;
+    const statusText = r.is_abnormal ? 'Abnormal' : 'Normal';
+    card.classList.remove('d-none');
+    card.classList.add('card-returned');
+    body.innerHTML = `
+      <table class="table table-bordered mb-0">
+        <tr><th>Systolic</th><td>${r.systolic} mmHg</td></tr>
+        <tr><th>Diastolic</th><td>${r.diastolic} mmHg</td></tr>
+        <tr><th>Pulse</th><td>${r.pulse} bpm</td></tr>
+        <tr><th>Status</th><td><span class="badge bg-${r.is_abnormal ? 'danger' : 'success'}">${statusText}</span></td></tr>
+        <tr><th>Device</th><td>${r.device_id}</td></tr>
+        <tr><th>Time</th><td>${r.timestamp}</td></tr>
+      </table>
+    `;
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('simulateForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const form = e.target;
+      const btn = form.querySelector('button[type=submit]');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Simulating...';
+
+      const formData = new FormData(form);
+
+      fetch(form.action, {
+        method: 'POST',
+        body: formData
+      })
+      .then(function (res) {
+        if (!res.ok) throw new Error('Server responded with ' + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        if (data.error) throw new Error(data.error);
+        showSuccess(data);
+      })
+      .catch(function (err) {
+        showError(err.message);
+      })
+      .finally(function () {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-play me-1"></i> Simulate Reading';
+      });
+    });
+  });
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .simulator-icon { font-size: 3rem; }
+  .card-returned { border-color: #4cc9f0 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card mb-4">
+      <div class="card-header text-center bg-dark text-white">
+        <span class="simulator-icon">📡</span>
+        <h3 class="mb-0 mt-2">BLE Device Simulator</h3>
+        <small class="text-white-50">Simulates a Bluetooth Blood Pressure Monitor</small>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-info">
+          <i class="fa-solid fa-info-circle me-2"></i>
+          This simulator mimics a Bluetooth Low Energy device capturing blood pressure readings. Fill in the values below or click "Generate Random" to simulate a real BLE device scenario.
+        </div>
+        <form id="simulateForm" action="{% url 'record_reading' %}" method="POST">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label for="id_systolic" class="form-label">Systolic (mmHg)</label>
+              <input type="number" id="id_systolic" name="systolic" class="form-control" placeholder="e.g. 120" required>
+            </div>
+            <div class="col-md-4">
+              <label for="id_diastolic" class="form-label">Diastolic (mmHg)</label>
+              <input type="number" id="id_diastolic" name="diastolic" class="form-control" placeholder="e.g. 80" required>
+            </div>
+            <div class="col-md-4">
+              <label for="id_pulse" class="form-label">Pulse (bpm)</label>
+              <input type="number" id="id_pulse" name="pulse" class="form-control" placeholder="e.g. 72" required>
+            </div>
+            <div class="col-12">
+              <label for="id_device_id" class="form-label">Device ID</label>
+              <input type="text" id="id_device_id" name="device_id" class="form-control" value="Simulator-BLE">
+            </div>
+          </div>
+
+          <div class="d-flex gap-2 mt-3">
+            <button type="submit" class="btn btn-primary flex-grow-1">
+              <i class="fa-solid fa-play me-1"></i> Simulate Reading
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="generateRandomReading()">
+              <i class="fa-solid fa-dice me-1"></i> Generate Random
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Web Bluetooth Section -->
+    <div class="card mt-4 border-primary">
+      <div class="card-header bg-primary text-white">
+        <i class="fa-brands fa-bluetooth-b me-1"></i> Real BLE Device Connection
+      </div>
+      <div class="card-body">
+        <div class="alert alert-info mb-3">
+          <i class="fa-solid fa-info-circle me-2"></i>
+          Click <strong>Connect BLE Device</strong> to pair with a real Bluetooth Blood Pressure Monitor.
+          Your browser will show a pairing dialog. Select a device that supports the Blood Pressure Profile
+          (service UUID <code>0x1810</code>).
+        </div>
+        <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+          <button id="bleConnectBtn" class="btn btn-primary" onclick="connectBLE()">
+            <i class="fa-brands fa-bluetooth-b me-1"></i> Connect BLE Device
+          </button>
+          <button id="bleReadBtn" class="btn btn-success" onclick="readBLE()" disabled>
+            <i class="fa-solid fa-rotate me-1"></i> Read Once
+          </button>
+          <button id="bleDisconnectBtn" class="btn btn-outline-danger" onclick="disconnectBLE()" disabled>
+            <i class="fa-solid fa-link-slash me-1"></i> Disconnect
+          </button>
+          <span id="bleStatus" class="badge bg-secondary">Not connected</span>
+        </div>
+        <small class="text-muted">
+          <i class="fa-regular fa-circle-info me-1"></i>
+          If no BLE device is available, use the simulator above. Both paths send data to the same
+          <code>POST /devices/readings/record/</code> endpoint.
+        </small>
+      </div>
+    </div>
+
+    <div id="resultCard" class="card d-none">
+      <div class="card-header">
+        <i class="fa-solid fa-heart-pulse me-1"></i>Last Reading
+      </div>
+      <div class="card-body p-0" id="resultBody"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

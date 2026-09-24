@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Prescriptions{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <h2 class="mb-0"><i class="fa-solid fa-file-prescription me-2"></i>Prescriptions</h2>
+    <div class="d-flex gap-2">
+        <form method="get" class="d-flex gap-1">
+            <input type="text" name="q" class="form-control form-control-sm" placeholder="Search prescriptions..." value="{{ search_query|default:'' }}" style="width:220px;">
+            <button type="submit" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-search"></i></button>
+            {% if search_query %}<a href="{% url 'prescription_list' %}" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-xmark"></i></a>{% endif %}
+        </form>
+        {% if user.role == 'doctor' %}
+            <a href="{% url 'create_prescription' %}" class="btn btn-primary btn-sm">
+                <i class="fa-solid fa-plus me-1"></i>New Prescription
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        {% if prescriptions %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            {% if user.role != 'patient' %}<th>Patient Name</th>{% endif %}
+                            <th>Doctor</th>
+                            <th>Items</th>
+                            <th>Notes</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in prescriptions %}
+                            <tr>
+                                <td>{{ p.created_at|date:"M d, Y" }}</td>
+                                {% if user.role != 'patient' %}<td>{{ p.patient.user.get_full_name|default:p.patient.user.username }}</td>{% endif %}
+                                <td>{% if p.doctor %}Dr. {{ p.doctor.user.get_full_name|default:p.doctor.user.username }}{% else %}<span class="badge bg-warning text-dark">AI Generated</span>{% endif %}</td>
+                                <td><span class="badge bg-secondary">{{ p.items.count }}</span></td>
+                                <td class="text-muted small text-truncate" style="max-width:200px;">{{ p.additional_notes|default:"-"|truncatewords:8 }}</td>
+                                <td>
+                                    <a href="{% url 'download_prescription_pdf' p.id %}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                        <i class="fa-solid fa-file-pdf me-1"></i>View PDF
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted text-center py-4 mb-0">{% if search_query %}No prescriptions match your search.{% else %}No prescriptions found.{% endif %}</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
