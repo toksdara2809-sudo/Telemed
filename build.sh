@@ -1,7 +1,11 @@
 #!/bin/bash
-# Vercel build script
+# Build script for deployment (Render, Vercel, etc.)
+set -o errexit
+
 echo "Building Django project..."
+pip install -r requirements.txt
 python manage.py collectstatic --noinput
 python manage.py migrate --noinput
-python manage.py seed_demo_data
+# Optional: seed data
+# python manage.py seed_demo_data
 echo "Build complete!"
