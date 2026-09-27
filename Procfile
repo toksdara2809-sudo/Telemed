@@ -1,1 +1,1 @@
-web: gunicorn telemed_project.wsgi:application
+web: gunicorn telemed_project.wsgi:application --bind 0.0.0.0:$PORT
